@@ -150,7 +150,7 @@ class Route
       $action = isset(explode('@', $callback)[1]) ? explode('@', $callback)[1] : 'index';
 
       if (!file_exists('../app/Http/Controllers/'.str_replace('\\', '/', $controller).'.php')) {
-        ModulusPHP\Core\Log::error($controller.' doesn\'t exist');
+        \App\Core\Log::error($controller.' doesn\'t exist');
         static::$status = 404;
         return true;
       }
