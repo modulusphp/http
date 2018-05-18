@@ -2,20 +2,13 @@
 
 namespace ModulusPHP\Http\Router;
 
-use ModulusPHP\Http\HttpFoundation;
+use App\Http\HttpFoundation;
 use ModulusPHP\Http\Requests\Request;
 
 class Route
 {
   static public $status = 404;
   static public $executed = false;
-
-  /**
-   * 
-   */
-  public static function group(Array $group, Closure $callback) {
-    call_user_func($callback);
-  }
 
   /**
    * get
