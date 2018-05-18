@@ -18,10 +18,10 @@ class BaseController
    * @param  string $model
    * @return model $model
    */
-  public function model($model) 
+  public function model($model)
   {
     require_once '../app/Models/' .$model . '.php';
-    return new $model(); 
+    return new $model();
   }
 
   /**
@@ -31,7 +31,7 @@ class BaseController
    * @param  array $data
    * @return view
    */
-  public function view($view, $data = []) 
+  public function view($view, $data = [])
   {
     return \ModulusPHP\Touch\View::make($view, $data);
   }
@@ -46,20 +46,6 @@ class BaseController
   {
     header('content-type: application/json');
     echo json_encode($response);
-  }
-
-  /**
-   * Upload file
-   * 
-   * @param  string $file
-   * @param  boolean $private
-   * @param  string $name
-   * @param  boolean $extensionOn
-   * @return array
-   */
-  public function upload($file, $private = true, $name = null, $extensionOn = true)
-  {
-    return \App\Core\Filesystem\File::upload($file, $private, $name, $extensionOn);
   }
 
   /**
