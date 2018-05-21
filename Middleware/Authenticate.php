@@ -11,5 +11,7 @@ class Authenticate
     if (Auth::isGuest() == true) {
       return true;
     }
+
+    return redirect();
   }
 }
