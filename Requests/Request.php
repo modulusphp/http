@@ -141,6 +141,17 @@ class Request
   }
 
   /**
+   * all
+   * 
+   * @return array
+   */
+  public function all()
+  {
+    $all = array_merge($_POST, $_FILES);
+    return $all;
+  }
+
+  /**
    * files
    * 
    * @return array

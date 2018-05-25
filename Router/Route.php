@@ -19,7 +19,7 @@ class Route
    * @return
    */
   public static function get($pattern, $callback, $ajax = false)
-  {    
+  {
     if (self::search(['GET'], $pattern, $callback, $ajax) == true) {
       static::$executed = true;
     }
@@ -96,9 +96,11 @@ class Route
    */
   private static function search($methods, $pattern, $callback, $ajax)
   {
+    $pattern = startsWith($pattern, '/') == false ? '/'.$pattern : $pattern ;
+
     // grouped routes support
     if (isset(debug_backtrace()[3]['args'][0]['prefix'])) {
-      $pattern = '/'.debug_backtrace()[3]['args'][0]['prefix'].$pattern;
+      $pattern = startsWith($pattern, '/') == false ? '/'.debug_backtrace()[3]['args'][0]['prefix'].$pattern : debug_backtrace()[3]['args'][0]['prefix'].$pattern;
     }
 
     if (isset(debug_backtrace()[3]['args'][0]['auth'])) {
@@ -203,7 +205,7 @@ class Route
           }
 
           if (method_exists($controller, $action)) {
-            call_user_func_array([$controller, $action], [$req]);
+            call_user_func_array([$controller, $action], [$req, $matches]);
             return true;
           }
 
@@ -240,7 +242,7 @@ class Route
           }
 
           if (method_exists($controller, $action)) {
-            call_user_func_array([$controller, $action], [$req]);
+            call_user_func_array([$controller, $action], [$req, $matches]);
             return true;
           }
 
