@@ -2,6 +2,8 @@
 
 namespace ModulusPHP\Http\Requests;
 
+use JeffOchoa\ValidatorFactory;
+
 class Request
 {
   /**
@@ -79,7 +81,28 @@ class Request
    */
   const VIEW = 'VIEW';
 
+  public $__method = null;
+
   public $__ajax = false;
+
+  public $__data = [];
+
+  public $__files = [];
+
+  public $validation = null;
+
+  /**
+   * Add data
+   */
+  public function add($args)
+  {
+    if (is_array($args)) {
+      return $this->__data = array_merge($this->__data, $args);
+    }
+
+    return $this->__data[] = $args;
+  }
+
   /**
    * hasInput
    * 
@@ -88,7 +111,7 @@ class Request
    */
   public function hasInput($name)
   {
-    if (isset($_POST[$name])) {
+    if (isset($this->__data[$name])) {
       return true;
     }
   }
@@ -101,7 +124,7 @@ class Request
    */
   public function input($name)
   {
-    return $_POST[$name];
+    return $this->__data[$name];
   }
 
   /**
@@ -112,7 +135,7 @@ class Request
    */
   public function hasFile($name)
   {
-    if (isset($_FILES[$name])) {
+    if (isset($this->__files[$name])) {
       return true;
     }
 
@@ -127,7 +150,7 @@ class Request
    */
   public function file($name)
   {
-    return $_FILES[$name];
+    return $this->__files[$name];
   }
 
   /**
@@ -137,7 +160,7 @@ class Request
    */
   public function data()
   {
-    return isset($_POST) ? $_POST : [];
+    return isset($this->__data) ? $this->__data : [];
   }
 
   /**
@@ -147,7 +170,7 @@ class Request
    */
   public function all()
   {
-    $all = array_merge($_POST, $_FILES);
+    $all = array_merge($this->__data, $this->__files);
     return $all;
   }
 
@@ -158,7 +181,7 @@ class Request
    */
   public function files()
   {
-    return isset($_FILES) ? $_FILES : [];
+    return isset($this->__files) ? $this->__files : [];
   }
 
   /**
@@ -179,5 +202,62 @@ class Request
   public function isAjax()
   {
     return $this->__ajax;
+  }
+
+  /**
+   * If validation fails, execute callback
+   * 
+   * @param  closure $callback
+   * @return call_user_func_array
+   */
+  public function validationFailed($callback)
+  {
+    $class = debug_backtrace()[1]['object'];
+    $args = debug_backtrace()[1]['args'];
+
+    $all = array_merge([$args[0]], $args[1]);
+
+    if (method_exists($class, 'validate')) {
+      $response = call_user_func_array([$class, 'validate'], $all);
+      $this->validation = $response;
+    }
+
+    if ($this->validation != null) {
+      return is_callable($callback) == false ?: call_user_func_array($callback, ['response' => $this->validation->toArray()]);
+    }
+  }
+
+  /**
+   * Validate incoming request.
+   * 
+   * @param  array $validation
+   * @return array
+   */
+  public static function validate($validation = [])
+  {
+    try {
+      $request = debug_backtrace()[2]['args'][1][0];
+      
+      if (is_object($request)) {
+        if ($validation != []) {
+          $factory = new ValidatorFactory();
+    
+          $data = array_merge($request->__data, $request->__files);
+    
+          if ($data !== null && $validation !== []) {
+            $response = $factory->make($data, $validation);
+            if ($response->fails()) {
+              return $response->errors();
+            }
+          }
+          
+          return null;
+        }
+      }
+    }
+    catch (Exception $e) {
+      \App\Core\Log::error($e);
+      return null;
+    }
   }
 }
