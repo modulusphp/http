@@ -204,6 +204,9 @@ class Route
             $req->__ajax = true;
           }
 
+          $req->__data = $_POST;
+          $req->__files = $_FILES;
+
           if (method_exists($controller, $action)) {
             call_user_func_array([$controller, $action], [$req, $matches]);
             return true;
@@ -240,6 +243,9 @@ class Route
           if ($ajax == true) {
             $req->__ajax = true;
           }
+
+          $req->__data = $_POST;
+          $req->__files = $_FILES;
 
           if (method_exists($controller, $action)) {
             call_user_func_array([$controller, $action], [$req, $matches]);
