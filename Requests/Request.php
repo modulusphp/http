@@ -2,6 +2,7 @@
 
 namespace ModulusPHP\Http\Requests;
 
+use ReflectionMethod;
 use JeffOchoa\ValidatorFactory;
 
 class Request
@@ -10,7 +11,7 @@ class Request
    * Request::GET
    */
   const GET = 'GET';
-  
+
   /**
    * Request::POST
    */
@@ -89,6 +90,8 @@ class Request
 
   public $__files = [];
 
+  public $__cookies = [];
+
   public $validation = null;
 
   /**
@@ -154,6 +157,30 @@ class Request
   }
 
   /**
+   * hasCookie
+   * 
+   * @param  string  $name
+   * @return boolean
+   */
+  public function hasCookie($name)
+  {
+    if (isset($this->__cookies[$name])) {
+      return true;
+    }
+  }
+
+  /**
+   * cookie
+   * 
+   * @param  string  $name
+   * @return file
+   */
+  public function cookie($name)
+  {
+    return $this->__cookies[$name];
+  }
+
+  /**
    * data
    * 
    * @return array
@@ -161,6 +188,16 @@ class Request
   public function data()
   {
     return isset($this->__data) ? $this->__data : [];
+  }
+
+  /**
+   * cookies
+   * 
+   * @return array
+   */
+  public function cookies()
+  {
+    return isset($this->__cookies) ? $this->__cookies : [];
   }
 
   /**
@@ -208,22 +245,29 @@ class Request
    * If validation fails, execute callback
    * 
    * @param  closure $callback
+   * @param  string  $validator
    * @return call_user_func_array
    */
-  public function validationFailed($callback)
+  public function validationFailed($callback, $validator = 'validate')
   {
+    if ($this->method() == Request::GET) {
+      return; // ignore
+    }
+
     $class = debug_backtrace()[1]['object'];
     $args = debug_backtrace()[1]['args'];
 
-    $all = array_merge([$args[0]], $args[1]);
-
-    if (method_exists($class, 'validate')) {
-      $response = call_user_func_array([$class, 'validate'], $all);
+    if (method_exists($class, $validator)) {
+      $response = call_user_func_array([$class, $validator], $args);
       $this->validation = $response;
     }
 
     if ($this->validation != null) {
-      return is_callable($callback) == false ?: call_user_func_array($callback, ['response' => $this->validation->toArray()]);
+      is_callable($callback) == false ?: call_user_func_array($callback, ['response' => $this->validation->toArray()]);
+
+      if ($this->validation) {
+        exit();
+      }
     }
   }
 
@@ -236,21 +280,21 @@ class Request
   public static function validate($validation = [])
   {
     try {
-      $request = debug_backtrace()[2]['args'][1][0];
-      
+      $request = debug_backtrace()[1]['args'][0];
+
       if (is_object($request)) {
         if ($validation != []) {
           $factory = new ValidatorFactory();
-    
+
           $data = array_merge($request->__data, $request->__files);
-    
+
           if ($data !== null && $validation !== []) {
             $response = $factory->make($data, $validation);
             if ($response->fails()) {
               return $response->errors();
             }
           }
-          
+
           return null;
         }
       }
