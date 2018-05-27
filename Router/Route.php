@@ -2,6 +2,7 @@
 
 namespace ModulusPHP\Http\Router;
 
+use ReflectionMethod;
 use App\Http\HttpFoundation;
 use ModulusPHP\Http\Requests\Request;
 
@@ -145,7 +146,6 @@ class Route
     }
 
     $controller;
-    $authController;
 
     if ($matches && is_callable($callback) == false) {
       $controller = explode('@', $callback)[0];
@@ -187,28 +187,26 @@ class Route
       }
 
       if ($matches && is_callable($callback) && $modifiedPattern == $modifiedUrl) {
-        self::middleware($middleware);
+        self::middleware($middleware, $matches, $ajax);
+        $matches = self::reflect($controller, $action, $matches, $ajax);
+        
         call_user_func($callback, (object)$matches);
         return true;
       }
       else if ($uri == $pattern && is_callable($callback) && $modifiedPattern == $modifiedUrl) {
-        self::middleware($middleware);
+        self::middleware($middleware, $matches, $ajax);
+        $matches = self::reflect($controller, $action, $matches, $ajax);
+        
         call_user_func($callback, (object)$matches);
         return true;
       }
       else if ($uri == $pattern && $modifiedPattern == $modifiedUrl) {
-        self::middleware($middleware);
+        self::middleware($middleware, $matches, $ajax);
+        $matches = self::reflect($controller, $action, $matches, $ajax);
+
         if ($_SERVER['REQUEST_METHOD'] == "POST") {
-          $req = new Request;
-          if ($ajax == true) {
-            $req->__ajax = true;
-          }
-
-          $req->__data = $_POST;
-          $req->__files = $_FILES;
-
           if (method_exists($controller, $action)) {
-            call_user_func_array([$controller, $action], [$req, $matches]);
+            call_user_func_array([$controller, $action], $matches);
             return true;
           }
 
@@ -216,7 +214,6 @@ class Route
           return true;
         }
         else if ($_SERVER['REQUEST_METHOD'] == "GET") {
-          self::middleware($middleware);
           if (method_exists($controller, $action)) {
             call_user_func_array([$controller, $action], $matches);
             return true;
@@ -226,7 +223,6 @@ class Route
           return true;
         }
         else {
-          self::middleware($middleware);
           if (method_exists($controller, $action)) {
             call_user_func_array([$controller, $action], $matches);
             return true;
@@ -237,18 +233,12 @@ class Route
         }
       }
       else if ($matches && is_string($callback) && $modifiedPattern == $modifiedUrl) {
-        self::middleware($middleware);
+        self::middleware($middleware, $matches, $ajax);
+        $matches = self::reflect($controller, $action, $matches, $ajax);
+
         if ($_SERVER['REQUEST_METHOD'] == "POST") {
-          $req = new Request;
-          if ($ajax == true) {
-            $req->__ajax = true;
-          }
-
-          $req->__data = $_POST;
-          $req->__files = $_FILES;
-
           if (method_exists($controller, $action)) {
-            call_user_func_array([$controller, $action], [$req, $matches]);
+            call_user_func_array([$controller, $action], $matches);
             return true;
           }
 
@@ -256,7 +246,6 @@ class Route
           return true;
         }
         else if ($_SERVER['REQUEST_METHOD'] == "GET") {
-          self::middleware($middleware);
           if (method_exists($controller, $action)) {
             call_user_func_array([$controller, $action], $matches);
             return true;
@@ -266,7 +255,6 @@ class Route
           return true;
         }
         else {
-          self::middleware($middleware);
           if (method_exists($controller, $action)) {
             call_user_func_array([$controller, $action], $matches);
             return true;
@@ -280,6 +268,92 @@ class Route
   }
 
   /**
+   * reflect
+   * 
+   * @param  class  $controller
+   * @param  method $action
+   * @param  array  $matches
+   * @param  bool   $ajax
+   * @return array  $matches
+   */
+  public static function reflect($controller, $action, $matches, $ajax)
+  {
+    if (method_exists($controller, $action) == false) {
+      return;
+    }
+
+    $r = new ReflectionMethod(new $controller(), $action);
+
+    $args = $r->getParameters();
+    $count = $r->getNumberOfParameters();
+    $required = $r->getNumberOfRequiredParameters();
+
+    $index = 0;
+    $noArgs = false;
+
+    if ($matches == null) {
+      $noArgs = true;
+      $matches = $args;
+    }
+
+    // if (count($matches) < $required) {
+    // 
+    // }
+
+    foreach($args as $param) {
+      $class = '\\'.$param->getType();
+
+      if (class_exists($class)) {
+        $where = array_keys($matches)[$index];
+        $value = array_values($matches)[$index];
+
+        if ($class == "\ModulusPHP\Http\Requests\Request") {
+          $req = new Request;
+          if ($ajax == true) {
+            $req->__ajax = true;
+          }
+
+          $req->__data = array_merge($_POST, $_GET);
+          $req->__files = $_FILES;
+          $req->__cookies = $_COOKIE;
+
+          if ($noArgs == false) {
+            $previous = array_prev_key($where, $matches);
+
+            if ($previous == null) {
+              $matches = array_merge([$req], $matches);
+            }
+            else {
+              $matches = array_insert_after($matches, $previous, [$req]);
+            }
+          }
+          else {
+            $matches[$where] = $req;
+          }
+        }
+        else if (strpos($class, '\Models') !== false) {
+          if ($where != null && is_integer($where) == false) {
+            $model = (new $class)->where($where, $value)->first();
+          }
+          else {
+            $model = null;
+          }
+
+          $matches[$where] = $model == null ? new $class : $model;
+        }
+        else {
+          $matches[$where] = new $class($matches[$value]);
+        }
+
+      }
+
+      $index++;
+    }
+
+    return $matches;
+  }
+
+  /**
    * parseUrl
    * 
    * @return string  $url
@@ -289,7 +363,15 @@ class Route
     return $url =  explode('/', filter_var(rtrim(substr($_SERVER['REQUEST_URI'], 1),'/'), FILTER_SANITIZE_URL));
   }
 
-  private static function middleware($routes = null)
+  /**
+   * middleware
+   * 
+   * @param  array $routes
+   * @param  array $matches
+   * @param  bool  $ajax
+   * @return void
+   */
+  private static function middleware($routes = null, $matches, $ajax)
   {
     if ($routes == null) {
       return;
@@ -298,7 +380,10 @@ class Route
     if (is_string($routes)) {
       foreach(HttpFoundation::$Middleware as $middlewareName => $middleroute) {
         if ($middlewareName == $routes) {
-          (new $middleroute)->handle();
+          $matches = Self::reflect($middleroute, 'handle', $matches, $ajax);
+          $middleroute = new $middleroute;
+
+          call_user_func_array([$middleroute, 'handle'], $matches);
         }
       }
       
@@ -308,7 +393,10 @@ class Route
     foreach($routes as $i) {
       foreach(HttpFoundation::$Middleware as $middlewareName => $middleroute) {
         if ($middlewareName == $i) {
-          if ((new $middleroute)->handle() == false) {
+          $matches = Self::reflect($middleroute, 'handle', $matches, $ajax);
+          $middleroute = new $middleroute;
+
+          if (call_user_func_array([$middleroute, 'handle'], $matches) == false) {
             return;
           }
         }
