@@ -7,11 +7,6 @@ use Illuminate\Database\Capsule\Manager as DB;
 
 class BaseController
 {
-  public function middleware($routes)
-  {
-    \App\Core\Middleware::run($routes);
-  }
-
   /**
    * Model
    * 
