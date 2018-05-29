@@ -2,7 +2,6 @@
 
 namespace ModulusPHP\Http\Router;
 
-use ReflectionMethod;
 use ModulusPHP\Framework\Reflect;
 use ModulusPHP\Framework\Middleware;
 
