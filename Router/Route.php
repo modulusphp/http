@@ -3,8 +3,8 @@
 namespace ModulusPHP\Http\Router;
 
 use ReflectionMethod;
-use App\Http\HttpFoundation;
-use ModulusPHP\Http\Requests\Request;
+use ModulusPHP\Framework\Reflect;
+use ModulusPHP\Framework\Middleware;
 
 class Route
 {
@@ -187,22 +187,22 @@ class Route
       }
 
       if ($matches && is_callable($callback) && $modifiedPattern == $modifiedUrl) {
-        self::middleware($middleware, $matches, $ajax);
-        $matches = self::reflect($controller, $action, $matches, $ajax);
-        
+        Middleware::run($middleware, $matches, $ajax);
+        $matches = Reflect::handle($controller, $action, $matches, $ajax);
+
         call_user_func($callback, (object)$matches);
         return true;
       }
       else if ($uri == $pattern && is_callable($callback) && $modifiedPattern == $modifiedUrl) {
-        self::middleware($middleware, $matches, $ajax);
-        $matches = self::reflect($controller, $action, $matches, $ajax);
-        
+        Middleware::run($middleware, $matches, $ajax);
+        $matches = Reflect::handle($controller, $action, $matches, $ajax);
+
         call_user_func($callback, (object)$matches);
         return true;
       }
       else if ($uri == $pattern && $modifiedPattern == $modifiedUrl) {
-        self::middleware($middleware, $matches, $ajax);
-        $matches = self::reflect($controller, $action, $matches, $ajax);
+        Middleware::run($middleware, $matches, $ajax);
+        $matches = Reflect::handle($controller, $action, $matches, $ajax);
 
         if ($_SERVER['REQUEST_METHOD'] == "POST") {
           if (method_exists($controller, $action)) {
@@ -233,8 +233,8 @@ class Route
         }
       }
       else if ($matches && is_string($callback) && $modifiedPattern == $modifiedUrl) {
-        self::middleware($middleware, $matches, $ajax);
-        $matches = self::reflect($controller, $action, $matches, $ajax);
+        Middleware::run($middleware, $matches, $ajax);
+        $matches = Reflect::handle($controller, $action, $matches, $ajax);
 
         if ($_SERVER['REQUEST_METHOD'] == "POST") {
           if (method_exists($controller, $action)) {
@@ -268,92 +268,6 @@ class Route
   }
 
   /**
-   * reflect
-   * 
-   * @param  class  $controller
-   * @param  method $action
-   * @param  array  $matches
-   * @param  bool   $ajax
-   * @return array  $matches
-   */
-  public static function reflect($controller, $action, $matches, $ajax)
-  {
-    if (method_exists($controller, $action) == false) {
-      return;
-    }
-
-    $r = new ReflectionMethod(new $controller(), $action);
-
-    $args = $r->getParameters();
-    $count = $r->getNumberOfParameters();
-    $required = $r->getNumberOfRequiredParameters();
-
-    $index = 0;
-    $noArgs = false;
-
-    if ($matches == null) {
-      $noArgs = true;
-      $matches = $args;
-    }
-
-    // if (count($matches) < $required) {
-    // 
-    // }
-
-    foreach($args as $param) {
-      $class = '\\'.$param->getType();
-
-      if (class_exists($class)) {
-        $where = array_keys($matches)[$index];
-        $value = array_values($matches)[$index];
-
-        if ($class == "\ModulusPHP\Http\Requests\Request") {
-          $req = new Request;
-          if ($ajax == true) {
-            $req->__ajax = true;
-          }
-
-          $req->__data = array_merge($_POST, $_GET);
-          $req->__files = $_FILES;
-          $req->__cookies = $_COOKIE;
-
-          if ($noArgs == false) {
-            $previous = array_prev_key($where, $matches);
-
-            if ($previous == null) {
-              $matches = array_merge([$req], $matches);
-            }
-            else {
-              $matches = array_insert_after($matches, $previous, [$req]);
-            }
-          }
-          else {
-            $matches[$where] = $req;
-          }
-        }
-        else if (strpos($class, '\Models') !== false) {
-          if ($where != null && is_integer($where) == false) {
-            $model = (new $class)->where($where, $value)->first();
-          }
-          else {
-            $model = null;
-          }
-
-          $matches[$where] = $model == null ? new $class : $model;
-        }
-        else {
-          $matches[$where] = new $class($matches[$value]);
-        }
-
-      }
-
-      $index++;
-    }
-
-    return $matches;
-  }
-
-  /**
    * parseUrl
    * 
    * @return string  $url
@@ -361,47 +275,6 @@ class Route
   private static function parseUrl()
   {
     return $url =  explode('/', filter_var(rtrim(substr($_SERVER['REQUEST_URI'], 1),'/'), FILTER_SANITIZE_URL));
-  }
-
-  /**
-   * middleware
-   * 
-   * @param  array $routes
-   * @param  array $matches
-   * @param  bool  $ajax
-   * @return void
-   */
-  private static function middleware($routes = null, $matches, $ajax)
-  {
-    if ($routes == null) {
-      return;
-    }
-
-    if (is_string($routes)) {
-      foreach(HttpFoundation::$Middleware as $middlewareName => $middleroute) {
-        if ($middlewareName == $routes) {
-          $matches = Self::reflect($middleroute, 'handle', $matches, $ajax);
-          $middleroute = new $middleroute;
-
-          call_user_func_array([$middleroute, 'handle'], $matches);
-        }
-      }
-      
-      return;
-    }
-
-    foreach($routes as $i) {
-      foreach(HttpFoundation::$Middleware as $middlewareName => $middleroute) {
-        if ($middlewareName == $i) {
-          $matches = Self::reflect($middleroute, 'handle', $matches, $ajax);
-          $middleroute = new $middleroute;
-
-          if (call_user_func_array([$middleroute, 'handle'], $matches) == false) {
-            return;
-          }
-        }
-      }
-    }
   }
 
   /**
