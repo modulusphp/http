@@ -248,7 +248,7 @@ class Request
    * @param  string  $validator
    * @return call_user_func_array
    */
-  public function validationFailed($callback, $validator = 'validate')
+  public function fails($callback = '', $validator = 'validate')
   {
     if ($this->method() == Request::GET) {
       return; // ignore
@@ -257,17 +257,91 @@ class Request
     $class = debug_backtrace()[1]['object'];
     $args = debug_backtrace()[1]['args'];
 
+    $request = debug_backtrace()[1]['args'][0];
+
     if (method_exists($class, $validator)) {
       $response = call_user_func_array([$class, $validator], $args);
-      $this->validation = $response;
+      if ($response->errors()->toArray() != null) $this->validation = $response->errors();
     }
 
     if ($this->validation != null) {
       is_callable($callback) == false ?: call_user_func_array($callback, ['response' => $this->validation->toArray()]);
 
       if ($this->validation) {
-        exit();
+        $_SESSION['validation.errors'] = $this->validation;
+        $_SESSION['form.old'] = $request->data();
       }
+      else {
+        unset($_SESSION['validation.errors']);
+        unset($_SESSION['form.old']);
+      }
+
+      $this->validation == false ?: die();
+    }
+  }
+
+  /**
+   * Try to validate an incoming request
+   * @param  closure $callback
+   * @param  string  $validator
+   */
+  public function try($callback = '', $validator = 'validate')
+  {
+    if ($this->method() == Request::GET) {
+      return; // ignore
+    }
+
+    $class = debug_backtrace()[3]['object'];
+    $args = debug_backtrace()[3]['args'];
+
+    $request = debug_backtrace()[3]['args'][0];
+
+    if (method_exists($class, $validator)) {
+      $response = call_user_func_array([$class, $validator], $args);
+      if ($response->errors()->toArray() != null) $this->validation = $response->errors();
+    }
+
+    if ($this->validation != null) {
+      if ($this->validation) {
+        $_SESSION['validation.errors'] = $this->validation;
+        $_SESSION['form.old'] = $request->data();
+      }
+      else {
+        unset($_SESSION['validation.errors']);
+        unset($_SESSION['form.old']);
+      }
+    }
+  }
+
+  /**
+   * If validation is successful, execute callback
+   * 
+   * @param  closure $callback
+   * @param  string  $validator
+   * @return call_user_func_array
+   */
+  public function success($callback = '', $validator = 'validate')
+  {
+    if ($this->method() == Request::GET) {
+      return; // ignore
+    }
+
+    $class = debug_backtrace()[1]['object'];
+    $args = debug_backtrace()[1]['args'];
+
+    $request = debug_backtrace()[1]['args'][0];
+
+    if (method_exists($class, $validator)) {
+      $response = call_user_func_array([$class, $validator], $args);
+      if ($response->errors()->toArray() != null) $this->validation = $response->errors();
+    }
+    else {
+      return;
+    }
+
+    if ($this->validation == null) {
+      is_callable($callback) == false ?: call_user_func_array($callback, [$request]);
+      $this->validation == true ?: die();
     }
   }
 
@@ -277,7 +351,7 @@ class Request
    * @param  array $validation
    * @return array
    */
-  public static function validate($validation = [])
+  public static function validate($validation = [], $custom = [])
   {
     try {
       $request = debug_backtrace()[1]['args'][0];
@@ -289,10 +363,8 @@ class Request
           $data = array_merge($request->__data, $request->__files);
 
           if ($data !== null && $validation !== []) {
-            $response = $factory->make($data, $validation);
-            if ($response->fails()) {
-              return $response->errors();
-            }
+            $response = $factory->make($data, $validation, $custom);
+            return $response;
           }
 
           return null;
