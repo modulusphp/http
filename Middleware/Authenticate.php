@@ -9,10 +9,10 @@ class Authenticate
 {
   public function handle(Request $request)
   {
-    if (Auth::isGuest() == true) {
+    if (Auth::user() != null) {
       return true;
     }
 
-    return redirect();
+    return redirect('/login');
   }
 }

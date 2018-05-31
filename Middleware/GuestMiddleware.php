@@ -9,8 +9,10 @@ class GuestMiddleware
 {
   public function handle(Request $request)
   {
-    if (Auth::isGuest() != true) {
-      return redirect('/');
+    if (Auth::isGuest() == true) {
+      return true;
     }
+
+    return redirect('/');
   }
 }
