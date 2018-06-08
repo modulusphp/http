@@ -2,6 +2,7 @@
 
 namespace ModulusPHP\Http\Router;
 
+use ReflectionMethod;
 use ModulusPHP\Framework\Reflect;
 use ModulusPHP\Framework\Middleware;
 
@@ -205,6 +206,10 @@ class Route
 
         if ($_SERVER['REQUEST_METHOD'] == "POST") {
           if (method_exists($controller, $action)) {
+            if (method_exists($controller, 'validate')) {
+              call_user_func_array([$controller, 'validate'], $matches);
+            }
+
             call_user_func_array([$controller, $action], $matches);
             return true;
           }

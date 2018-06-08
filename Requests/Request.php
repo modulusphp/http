@@ -2,6 +2,7 @@
 
 namespace ModulusPHP\Http\Requests;
 
+use App\Core\Log;
 use ReflectionMethod;
 use JeffOchoa\ValidatorFactory;
 
@@ -91,6 +92,8 @@ class Request
   public $__files = [];
 
   public $__cookies = [];
+
+  public $__headers = [];
 
   public $validation = null;
 
@@ -221,6 +224,23 @@ class Request
     return isset($this->__files) ? $this->__files : [];
   }
 
+  public function hasHeader($name)
+  {
+    if (isset($this->__headers[$name])) {
+      return true;
+    }
+  }
+
+  public function header($name)
+  {
+    return $this->__headers[$name];
+  }
+
+  public function headers()
+  {
+    return $this->__headers;
+  }
+
   /**
    * method
    * 
@@ -228,7 +248,11 @@ class Request
    */
   public function method()
   {
-    return $_SERVER['REQUEST_METHOD'];
+    if ($this->__method == null) {
+      return $_SERVER['REQUEST_METHOD'];
+    }
+
+    return $this->__method;
   }
 
   /**
@@ -239,6 +263,18 @@ class Request
   public function isAjax()
   {
     return $this->__ajax;
+  }
+
+  public function canRedirect()
+  {
+    $refer = $this->header('Referer');
+    if ($refer != $this->currentUrl() && 0 === strpos($refer, $this->host())) return true;
+    return false;
+  }
+
+  public function redirect()
+  {
+    redirect($this->header('Referer'));
   }
 
   /**
@@ -375,5 +411,15 @@ class Request
       \App\Core\Log::error($e);
       return null;
     }
+  }
+
+  public function currentUrl()
+  {
+    return (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+  }
+
+  public function host()
+  {
+    return (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
   }
 }
