@@ -13,6 +13,6 @@ class GuestMiddleware
       return true;
     }
 
-    return redirect('/');
+    return redirect();
   }
 }
