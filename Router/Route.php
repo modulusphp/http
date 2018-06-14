@@ -133,8 +133,6 @@ class Route
       $pattern = startsWith($pattern, '/') == false ? '/'.debug_backtrace()[4]['args'][0]['prefix'].$pattern : debug_backtrace()[4]['args'][0]['prefix'].$pattern;
     }
 
-    \App\Core\Log::info(debug_backtrace());
-
     if (isset(debug_backtrace()[4]['args'][0]['auth'])) {
       if (debug_backtrace()[4]['args'][0]['auth'] == true && is_string($callback)) {
         $callback = 'Auth\\'.$callback;
