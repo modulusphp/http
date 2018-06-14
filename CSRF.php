@@ -15,7 +15,7 @@ class CSRF
    */
   public static function generate()
   {
-    return $_SESSION['application.csrf_token'] = bin2hex(random_bytes(32));
+    return $_SESSION['application.csrf_token'] = self::genTimeStamp().bin2hex(random_bytes(20));
   }
 
   /**
@@ -34,10 +34,15 @@ class CSRF
 
       $csrfToken = $request->hasInput('csrf_token') ? $request->input('csrf_token') : $request->header('X-CSRF-Token');
 
-      if (!hash_equals($_SESSION['application.csrf_token'], $csrfToken)) {
-        unset($_SESSION['application.csrf_token']);
-        View::error(400);
-        die();
+      if (self::verTimeStamp(strtok($csrfToken, '==').'==') == false) {
+        self::tokenError();
+      }
+
+      $csrfToken = substr($csrfToken, strrpos($csrfToken, '=') + 1);
+      $sessionToken = substr($_SESSION['application.csrf_token'], strrpos($_SESSION['application.csrf_token'], '=') + 1);
+
+      if (!hash_equals($sessionToken, $csrfToken)) {
+        self::tokenError();
       }
 
       unset($_SESSION['application.csrf_token']);
@@ -45,5 +50,43 @@ class CSRF
     else {
       return;
     }
+  }
+
+  /**
+   * Generate timestamp
+   * 
+   * @return date()
+   */
+  public static function genTimeStamp()
+  {
+    return base64_encode(date('Y-m-d H:i:s'));
+  }
+
+  /**
+   * Verify timestamp
+   * 
+   * @param  string  $time
+   * @return boolean
+   */
+  public static function verTimeStamp($time)
+  {
+    $time = base64_decode($time);
+    $expire = config('app.session_token.token');
+
+    if(strtotime($time) < strtotime("-$expire minutes")) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Generate error
+   */
+  public static function tokenError()
+  {
+    unset($_SESSION['application.csrf_token']);
+    View::error(400);
+    die();
   }
 }
