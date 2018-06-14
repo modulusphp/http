@@ -35,14 +35,14 @@ class CSRF
       $csrfToken = $request->hasInput('csrf_token') ? $request->input('csrf_token') : $request->header('X-CSRF-Token');
 
       if (self::verTimeStamp(strtok($csrfToken, '==').'==') == false) {
-        self::tokenError();
+        self::tokenError(1000);
       }
 
       $csrfToken = substr($csrfToken, strrpos($csrfToken, '=') + 1);
       $sessionToken = substr($_SESSION['application.csrf_token'], strrpos($_SESSION['application.csrf_token'], '=') + 1);
 
       if (!hash_equals($sessionToken, $csrfToken)) {
-        self::tokenError();
+        self::tokenError(400);
       }
 
       unset($_SESSION['application.csrf_token']);
@@ -71,7 +71,7 @@ class CSRF
   public static function verTimeStamp($time)
   {
     $time = base64_decode($time);
-    $expire = config('app.session_token.token');
+    $expire = config('app.session_token.expire');
 
     if(strtotime($time) < strtotime("-$expire minutes")) {
       return false;
@@ -83,10 +83,10 @@ class CSRF
   /**
    * Generate error
    */
-  public static function tokenError()
+  public static function tokenError($code)
   {
     unset($_SESSION['application.csrf_token']);
-    View::error(400);
+    View::error($code);
     die();
   }
 }
