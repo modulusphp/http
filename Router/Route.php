@@ -129,19 +129,21 @@ class Route
     $pattern = startsWith($pattern, '/') == false ? '/'.$pattern : $pattern ;
 
     // grouped routes support
-    if (isset(debug_backtrace()[3]['args'][0]['prefix'])) {
-      $pattern = startsWith($pattern, '/') == false ? '/'.debug_backtrace()[3]['args'][0]['prefix'].$pattern : debug_backtrace()[3]['args'][0]['prefix'].$pattern;
+    if (isset(debug_backtrace()[4]['args'][0]['prefix'])) {
+      $pattern = startsWith($pattern, '/') == false ? '/'.debug_backtrace()[4]['args'][0]['prefix'].$pattern : debug_backtrace()[4]['args'][0]['prefix'].$pattern;
     }
 
-    if (isset(debug_backtrace()[3]['args'][0]['auth'])) {
-      if (debug_backtrace()[3]['args'][0]['auth'] == true && is_string($callback)) {
+    \App\Core\Log::info(debug_backtrace());
+
+    if (isset(debug_backtrace()[4]['args'][0]['auth'])) {
+      if (debug_backtrace()[4]['args'][0]['auth'] == true && is_string($callback)) {
         $callback = 'Auth\\'.$callback;
       }
     }
 
     $middleware = null;
-    if (isset(debug_backtrace()[3]['args'][0]['middleware'])) {
-      $middleware = debug_backtrace()[3]['args'][0]['middleware'];
+    if (isset(debug_backtrace()[2]['args'][0]['middleware'])) {
+      $middleware = debug_backtrace()[2]['args'][0]['middleware'];
     }
 
     // if there's already a matched route, don't run this
