@@ -2,6 +2,7 @@
 
 namespace ModulusPHP\Http\Router;
 
+use Closure;
 use ReflectionMethod;
 use ModulusPHP\Framework\Reflect;
 use ModulusPHP\Framework\Middleware;
@@ -10,6 +11,34 @@ class Route
 {
   static public $status = 404;
   static public $executed = false;
+
+  /**
+   * grouped routes
+   * 
+   * @param  array   $group
+   * @param  closure $callback
+   * @return
+   */
+  public static function group(Array $group, Closure $callback) {
+    call_user_func($callback);
+  }
+
+  /**
+   * vue
+   * 
+   * @param  closure $callback
+   * @return
+   */
+  public static function vue(Closure $callback) {
+    if (static::$status == 200) {
+      return;
+    }
+
+    static::$executed = true;
+    static::$status = 200;
+
+    call_user_func($callback);
+  }
 
   /**
    * get
