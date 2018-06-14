@@ -140,8 +140,8 @@ class Route
     }
 
     $middleware = null;
-    if (isset(debug_backtrace()[2]['args'][0]['middleware'])) {
-      $middleware = debug_backtrace()[2]['args'][0]['middleware'];
+    if (isset(debug_backtrace()[4]['args'][0]['middleware'])) {
+      $middleware = debug_backtrace()[4]['args'][0]['middleware'];
     }
 
     // if there's already a matched route, don't run this
