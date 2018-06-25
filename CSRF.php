@@ -82,6 +82,9 @@ class CSRF
 
   /**
    * Generate error
+   *
+   * @param  integer $code
+   * @return
    */
   public static function tokenError($code)
   {
