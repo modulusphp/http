@@ -1,7 +1,7 @@
 {
   "name": "modulusphp/http",
   "description": "Http component for modulusPHP",
-  "version": "1.0",
+  "version": "1.0.1",
   "license": "MIT",
   "type": "package",
   "authors": [
@@ -17,7 +17,8 @@
   },
   "require": {
     "modulusphp/touch": ">=1.0",
-    "illuminate/database": "^5.6"
+    "illuminate/database": "^5.6",
+    "modulusphp/framework": ">=1.0.2"
   },
   "minimum-stability": "stable"
 }
