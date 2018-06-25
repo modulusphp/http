@@ -5,6 +5,7 @@ namespace ModulusPHP\Http\Requests;
 use App\Core\Log;
 use ReflectionMethod;
 use JeffOchoa\ValidatorFactory;
+use ModulusPHP\Framework\Validate;
 
 class Request
 {
@@ -284,7 +285,7 @@ class Request
    * @param  string  $validator
    * @return call_user_func_array
    */
-  public function fails($callback = '', $validator = 'validate')
+  public function fails($callback = '', $validator = 'validator')
   {
     if ($this->method() == Request::GET) {
       return; // ignore
@@ -321,7 +322,7 @@ class Request
    * @param  closure $callback
    * @param  string  $validator
    */
-  public function try($callback = '', $validator = 'validate')
+  public function try($callback = '', $validator = 'validator')
   {
     if ($this->method() == Request::GET) {
       return; // ignore
@@ -356,7 +357,7 @@ class Request
    * @param  string  $validator
    * @return call_user_func_array
    */
-  public function success($callback = '', $validator = 'validate')
+  public function success($callback = '', $validator = 'validator')
   {
     if ($this->method() == Request::GET) {
       return; // ignore
@@ -387,25 +388,13 @@ class Request
    * @param  array $validation
    * @return array
    */
-  public static function validate($validation = [], $custom = [])
+  public function validate($validation = [], $unknown = null, $custom = [])
   {
     try {
-      $request = debug_backtrace()[1]['args'][0];
+      $data = array_merge($this->__data, $this->__files);
 
-      if (is_object($request)) {
-        if ($validation != []) {
-          $factory = new ValidatorFactory();
-
-          $data = array_merge($request->__data, $request->__files);
-
-          if ($data !== null && $validation !== []) {
-            $response = $factory->make($data, $validation, $custom);
-            return $response;
-          }
-
-          return null;
-        }
-      }
+      $response = Validate::make($data, $validation, $unknown, $custom);
+      return $response;
     }
     catch (Exception $e) {
       \App\Core\Log::error($e);
