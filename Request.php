@@ -169,8 +169,18 @@ class Request
   {
     $this->data = $data;
 
-    if ($data !== []) {
-      foreach ($data as $key => $value) {
+    if (
+      isset(getallheaders()['Content-Type']) &&
+      (
+        str_contains(strtolower(getallheaders()['Content-Type']), 'json') ||
+        str_contains(strtolower(getallheaders()['Content-Type']), 'javascript')
+      )
+    ) {
+      $this->data = array_merge($this->data, json_decode(file_get_contents("php://input"), true));
+    }
+
+    if ($this->data !== []) {
+      foreach ($this->data as $key => $value) {
         if (!in_array($key, $this->protected)) $this->{$key} = $value;
       }
     }
