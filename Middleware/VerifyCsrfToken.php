@@ -67,11 +67,12 @@ class VerifyCsrfToken
   /**
    * shouldIgnore
    *
-   * @param mixed $request
+   * @param  \Modulus\Http\Request  $request
    * @return void
    */
   protected function shouldIgnore($request) : bool
   {
+    $this->createUrl($request, 'except');
     if (in_array($request->path(), $this->except)) return true;
 
     return false;
@@ -80,14 +81,14 @@ class VerifyCsrfToken
   /**
    * tokenMatches
    *
-   * @param mixed $request
+   * @param  \Modulus\Http\Request  $request
    * @return void
    */
   protected function tokenMatches($request) : bool
   {
     if (!isset( $_SESSION['_saini']) || !$_SESSION['_saini']) return false;
 
-    $csrfToken = $request->has('csrf_token') ? $request->input('csrf_token') : ($request->hasHeader('X-CSRF-Token') ? $request->header('X-CSRF-Token') : null);
+    $csrfToken = $request->has('csrf_token') ? $request->input('csrf_token') : ($request->hasHeader('X-CSRF-TOKEN') ? $request->header('X-CSRF-TOKEN') : null);
     $sessionToken =  $_SESSION['_saini'];
 
     if (!hash_equals($sessionToken, $csrfToken)) {
@@ -100,11 +101,15 @@ class VerifyCsrfToken
   /**
    * hasNotExpired
    *
+   * @param  \Modulus\Http\Request  $request
    * @return void
    */
   protected function hasNotExpired($request) : bool
   {
     if (!isset($_SESSION['_cksal'])) return false;
+
+    $this->createUrl($request, 'expire');
+
     if (in_array($request->path(), $this->canExpire)) return true;
 
     $time = $_SESSION['_cksal'];
@@ -118,5 +123,44 @@ class VerifyCsrfToken
     }
 
     return true;
+  }
+
+  /**
+   * Create url
+   *
+   * @param  \Modulus\Http\Request  $request
+   * @param  string  $type
+   * @return void
+   */
+  private function createUrl($request, string $type)
+  {
+    $data = ($type == 'expire') ? $this->canExpire : $this->except;
+
+    foreach($data as $i => $url) {
+      if (str_contains($url, '{*}')) {
+        $path = explode('/', $request->path());
+        $url = explode('/', $url);
+
+        if (count($path) == count($url)) {
+          $current = [];
+
+          foreach($url as $k => $t) {
+            if ($t == $path[$k]) {
+              $current[] = $t;
+            } elseif ($t == '{*}') {
+              $current[] = $path[$k];
+            }
+          }
+
+          $data[$i] = implode('/', $current);
+        }
+      }
+    }
+
+    if ($type == 'expire') {
+      $this->canExpire = $data;
+    } else {
+      $this->except = $data;
+    }
   }
 }
