@@ -138,8 +138,8 @@ class VerifyCsrfToken
 
     foreach($data as $i => $url) {
       if (str_contains($url, '{*}')) {
-        $path = explode('/', $request->path());
-        $url = explode('/', $url);
+        $path = explode('/', (substr($request->path(), 0, 1) == '/' ? substr($request->path(), 1) : $request->path()));
+        $url = explode('/', (substr($url, 0, 1) == '/' ? substr($url, 1) : $url));
 
         if (count($path) == count($url)) {
           $current = [];
