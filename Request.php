@@ -494,7 +494,8 @@ class Request
 
     if (count($response->errors()) > 0 || $response->fails()) {
       if ($this->isAjax()) {
-        return response()->json($response->errors()->toArray(), 422);
+        response()->json($response->errors()->toArray(), 422);
+        die();
       }
 
       if (isset($this->headers()['Referer'])) {
@@ -506,7 +507,8 @@ class Request
             ->code(302)
             ->send();
       } else {
-        return response()->json($response->errors()->toArray(), 422);
+        response()->json($response->errors()->toArray(), 422);
+        die();
       }
     }
   }
