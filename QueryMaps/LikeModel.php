@@ -17,6 +17,6 @@ class LikeModel extends RouteQuery
    */
   protected function handle(EloquentModel $model, $field, $value) : EloquentModel
   {
-    return $model::where($field, 'like', '%' . trim($value) . '%')->first() ?? $model;
+    return $model::where($field, 'like', '%' . $value . '%')->first() ?? $model;
   }
 }

@@ -17,6 +17,6 @@ class LikeGroup extends RouteQuery
    */
   protected function handle(Groupable $group, $field, $value, $name) : Groupable
   {
-    return $group->assign($group->model()::where($field, 'like', '%' . trim($value) . '%')->get() ?? new Collection);
+    return $group->assign($group->model()::where($field, 'like', '%' . $value . '%')->get() ?? new Collection);
   }
 }
