@@ -7,6 +7,24 @@ use Modulus\Utility\View;
 class Controller
 {
   /**
+   * $middleware
+   *
+   * @var string
+   */
+  public $middleware;
+
+  /**
+   * Set middleware
+   *
+   * @return void
+   */
+  public function middleware()
+  {
+    $this->middleware = new Middleware(func_get_args());
+    return $this->middleware;
+  }
+
+  /**
    * Create view
    *
    * @param string $name

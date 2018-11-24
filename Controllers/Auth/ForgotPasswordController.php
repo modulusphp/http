@@ -7,6 +7,7 @@ use Modulus\Http\Request;
 use Modulus\Http\Session;
 use Modulus\Utility\View;
 use Modulus\Http\Redirect;
+use Modulus\Security\Hash;
 use Modulus\Framework\Password;
 use Modulus\Utility\Notification;
 use Modulus\Framework\Auth\RedirectsUsers;
@@ -182,7 +183,7 @@ class ForgotPasswordController
   public function updatePassword($request, $user)
   {
     return $user->update([
-      'password' => $request->input('password')
+      'password' => Hash::make($request->input('password'))
     ]);
   }
 

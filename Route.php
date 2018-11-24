@@ -19,7 +19,7 @@ class Route
    *
    * @var string
    */
-  private $middleware;
+  private $middleware = [];
 
   /**
    * $namespace
@@ -36,10 +36,17 @@ class Route
   private $prefix;
 
   /**
+   * $domain
+   *
+   * @var string
+   */
+  private $domain;
+
+  /**
    * Add routes
    *
    * @param string $file
-   * @return void
+   * @return Route
    */
   public static function make(string $file) : Route
   {
@@ -52,12 +59,12 @@ class Route
   /**
    * Set routes middleware
    *
-   * @param string $middleware
-   * @return void
+   * @param string $name
+   * @return Route
    */
-  public function middleware(string $middleware) : Route
+  public function middleware() : Route
   {
-    $this->middleware = explode(':', $middleware);
+    $this->middleware = array_merge($this->middleware, func_get_args());
     return $this;
   }
 
@@ -65,7 +72,7 @@ class Route
    * Set routes namespace
    *
    * @param string $namespace
-   * @return void
+   * @return Route
    */
   public function namespace(string $namespace) : Route
   {
@@ -77,11 +84,23 @@ class Route
    * Set routes prefix
    *
    * @param string $prefix
-   * @return void
+   * @return Route
    */
   public function prefix(string $prefix) : Route
   {
     $this->prefix = $prefix;
+    return $this;
+  }
+
+  /**
+   * Set routes domain
+   *
+   * @param string $domain
+   * @return Route
+   */
+  public function domain(string $domain) : Route
+  {
+    $this->domain = $domain;
     return $this;
   }
 
@@ -93,10 +112,39 @@ class Route
   public function register()
   {
     $middleware = ($this->middleware !== null) ? ['middleware' => $this->middleware] : [];
-    $prefix = ($this->prefix !== null) ? ['prefix' => $this->prefix] : [];
+    $prefix     = ($this->prefix !== null) ? ['prefix' => $this->prefix] : [];
+    $domain     = ($this->domain !== null) ? ['domain' => $this->domain] : [];
 
-    Swish::group(array_merge($middleware, $prefix), function() {
+    Swish::group(array_merge($domain, $middleware, $prefix), function() {
       startphp($this->file);
     });
+  }
+
+  /**
+   * Generate url from route
+   *
+   * @param string $name
+   * @param null|array $parameters
+   * @return string $url
+   */
+  public static function url(string $name, ?array $parameters = [])
+  {
+    $url = null;
+
+    foreach (Swish::$routes as $route) {
+      if ($route['name'] == $name) {
+        $url = $route['pattern'];
+
+        if ($route['required'] > 0 && ($route['required'] == count($parameters))) {
+          foreach ($parameters as $name => $parameter) {
+            $url = str_replace('{' . $name . '}', $parameter, $url);
+          }
+        }
+      }
+    }
+
+    if (str_contains($url, ['{', '}'])) $url = null;
+
+    return $url;
   }
 }

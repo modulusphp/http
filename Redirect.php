@@ -2,6 +2,7 @@
 
 namespace Modulus\Http;
 
+use Modulus\Http\Route;
 use Modulus\Http\Status;
 
 class Redirect
@@ -27,13 +28,19 @@ class Redirect
    */
   private $code = 200;
 
+  /**
+   * __construct
+   *
+   * @param mixed ?string
+   * @return void
+   */
   public function __construct(?string $url = null)
   {
-    if ($url !== null) $this->url = $url; 
+    if ($url !== null) $this->url = $url;
   }
 
   /**
-   * to
+   * Redirect to path
    *
    * @param string $path
    * @param integer $code
@@ -68,6 +75,26 @@ class Redirect
   }
 
   /**
+   * Redirect to route
+   *
+   * @param string $name
+   * @param mixed ?array
+   * @param integer $code
+   * @return Redirect
+   */
+  public function route(string $name, ?array $parameters = [], ?int $code = null)
+  {
+    $this->url = Route::url($name, $parameters);
+
+    if ($code !== null) {
+      $this->code = $code;
+      return $this->send();
+    }
+
+    return $this;
+  }
+
+  /**
    * Attach variables with redirect
    *
    * @param string $name
@@ -78,6 +105,25 @@ class Redirect
   public function with(string $name, $value, ?int $code = null)
   {
     $this->with = array_merge([$name => $value], $this->with);
+
+    if ($code != null) {
+      $this->code = $code;
+      return $this->send();
+    }
+
+    return $this;
+  }
+
+  /**
+   * Attach old variables with redirect
+   *
+   * @param array $value
+   * @param integer $code
+   * @return Redirect
+   */
+  public function old(array $value, ?int $code = null)
+  {
+    $this->with = array_merge(['form.old' => $value], $this->with);
 
     if ($code != null) {
       $this->code = $code;
