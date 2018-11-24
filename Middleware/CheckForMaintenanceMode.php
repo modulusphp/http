@@ -3,6 +3,7 @@
 namespace Modulus\Http\Middleware;
 
 use Modulus\Utility\Events;
+use Modulus\Http\Exceptions\ServiceUnavailableHttpException;
 
 class CheckForMaintenanceMode
 {
@@ -49,7 +50,7 @@ class CheckForMaintenanceMode
         return $continue;
       }
 
-      Events::trigger('maintenance', [$data['message'] ?? 'Be right back.']);
+      throw new ServiceUnavailableHttpException($data['message'] ?? 'Be right back.', $request->isAjax());
     }
 
     return $continue;

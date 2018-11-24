@@ -2,6 +2,7 @@
 
 namespace Modulus\Http\Middleware;
 
+use Modulus\Http\Rest;
 use Modulus\Security\Auth;
 use ReallySimpleJWT\TokenBuilder;
 use ReallySimpleJWT\TokenValidator;
@@ -33,7 +34,7 @@ class AuthenticateWithBearerAuth
    */
   protected function hasBearerAuth($request) : bool
   {
-    if ($request->hasHeader('Authorization') && starts_with($request->header('Authorization'), 'Bearer ')) {
+    if ($request->header->has('Authorization') && starts_with($request->header('Authorization'), 'Bearer ')) {
       return true;
     }
 
@@ -59,7 +60,7 @@ class AuthenticateWithBearerAuth
       cancel();
     }
 
-    $userid = $payLoad['iss'];
+    $userid   = $payLoad['iss'];
     $provider = $payLoad['pro'];
 
     $model = config('auth.provider.' . $provider . '.model');
@@ -77,7 +78,7 @@ class AuthenticateWithBearerAuth
    */
   protected function validateToken($token)
   {
-    $hash = explode(':', config('app.key'))[0];
+    $hash   = explode(':', config('app.key'))[0];
     $secret = explode(':', config('app.key'))[1];
 
     if ($hash == 'base64') $secret = base64_decode($secret);
