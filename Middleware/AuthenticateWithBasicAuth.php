@@ -5,6 +5,7 @@ namespace Modulus\Http\Middleware;
 use Modulus\Http\Rest;
 use Modulus\Security\Auth;
 use ReallySimpleJWT\TokenBuilder;
+use Illuminate\Database\Eloquent\Model;
 
 class AuthenticateWithBasicAuth
 {
@@ -92,7 +93,7 @@ class AuthenticateWithBasicAuth
    */
   protected function hasBasicAuth($request) : bool
   {
-    if ($request->hasHeader('Authorization') && starts_with($request->header('Authorization'), 'Basic ')) {
+    if ($request->headers->has('Authorization') && starts_with($request->header('Authorization'), 'Basic ')) {
       return true;
     }
 
@@ -135,8 +136,8 @@ class AuthenticateWithBasicAuth
       $this->provider
     );
 
-    if (isset($response['__MUST_RETURN__'])) {
-      Auth::grant($response['__MUST_RETURN__']);
+    if ($response instanceof Model) {
+      Auth::grant($response);
       return true;;
     }
 
@@ -151,19 +152,20 @@ class AuthenticateWithBasicAuth
    */
   protected function withAccessToken($request)
   {
-    $hash = explode(':', config('app.key'))[0];
+    $hash   = explode(':', config('app.key'))[0];
     $secret = explode(':', config('app.key'))[1];
+    $expire = strtotime(config('auth.expire.access_token'));
 
     if ($hash == 'base64') $secret = base64_decode($secret);
 
     $token = (new TokenBuilder())->addPayload(['key' => 'pro', 'value' => $this->provider])
         ->setSecret($secret)
-        ->setExpiration(strtotime(config('auth.expire.access_token')))
+        ->setExpiration($expire)
         ->setIssuer(Auth::user()->id)
         ->build();
 
     $request->add([
-      'access_token' => $token
+      'access_token' => $token,
     ]);
 
     return $request;
