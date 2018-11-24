@@ -367,7 +367,7 @@ class Request
    */
   public function headers() : array
   {
-    return $this->headers;
+    return $this->headers->all();
   }
 
   /**
