@@ -3,8 +3,10 @@
 namespace Modulus\Http\Controllers\Auth;
 
 use Modulus\Http\Request;
+use Modulus\Security\Hash;
 use Modulus\Http\Controller;
 use Modulus\Utility\Notification;
+use Illuminate\Database\Eloquent\Model;
 use Modulus\Framework\Auth\Notifications\MustVerifyEmail;
 
 class RegisterController extends Controller
@@ -33,11 +35,7 @@ class RegisterController extends Controller
     return [
       'name' => 'required|string|max:255',
       'email' => [
-        'required',
-        'string',
-        'email',
-        'max:255',
-        new Unique('users'),
+        'required', 'string', 'email', 'max:255', new Unique('users'),
       ],
       'password' => 'required|string|min:6',
     ];
@@ -49,12 +47,12 @@ class RegisterController extends Controller
    * @param \Modulus\Http\Request $request
    * @return \App\User
    */
-  protected function create(Request $request)
+  protected function create(Request $request) : Model
   {
     return User::create([
       'name' => $request->input('name'),
       'email' => $request->input('email'),
-      'password' => $request->input('password')
+      'password' => Hash::make($request->input('password'))
     ]);
   }
 
