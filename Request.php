@@ -3,8 +3,14 @@
 namespace Modulus\Http;
 
 use Closure;
+use Modulus\Http\Rest;
 use Modulus\Http\Redirect;
+use Modulus\Request\Server;
+use AtlantisPHP\Swish\Route;
+use Modulus\Request\Cookies;
+use Modulus\Request\Headers;
 use Modulus\Utility\Validate;
+use Illuminate\Database\Eloquent\Model;
 
 class Request
 {
@@ -100,16 +106,23 @@ class Request
   /**
    * Application cookies
    *
-   * @var $cookies
+   * @var Cookies
    */
-  public $cookies = [];
+  public $cookies;
 
   /**
    * Application headers
    *
-   * @var $headers
+   * @var Headers
    */
-  public $headers = [];
+  public $headers;
+
+  /**
+   * $server
+   *
+   * @var Server
+   */
+  public $server;
 
   /**
    * Request method
@@ -117,6 +130,13 @@ class Request
    * @var $method
    */
   public $method;
+
+  /**
+   * $route
+   *
+   * @var array
+   */
+  public $route;
 
   /**
    * Request type
@@ -149,8 +169,10 @@ class Request
     'files',
     'cookies',
     'headers',
+    'server',
     'method',
     'rules',
+    'route'
   ];
 
   /**
@@ -190,8 +212,9 @@ class Request
     });
 
     $this->files   = $files;
-    $this->cookies = $_COOKIE;
-    $this->headers = getallheaders();
+    $this->cookies = new Cookies();
+    $this->headers = new Headers();
+    $this->server  = new Server();
     $this->path    = (str_contains($_SERVER['REQUEST_URI'], '?')) ? explode('?', ($_SERVER['REQUEST_URI']))[0] : $_SERVER['REQUEST_URI'];
     $this->url     = $_SERVER['REQUEST_URI'];
     $this->method  = $_SERVER['REQUEST_METHOD'];
@@ -204,7 +227,7 @@ class Request
    * Add items
    *
    * @param  array  $data
-   * @return array
+   * @return Request
    */
   public function add(array $data = []) : array
   {
@@ -215,7 +238,7 @@ class Request
     });
 
     $this->files = array_merge($this->files, $files);
-    return $this->data;
+    return $this;
   }
 
   /**
@@ -243,30 +266,6 @@ class Request
   }
 
   /**
-   * Request has cookie
-   *
-   * @param  string $name
-   * @return bool
-   */
-  public function hasCookie($name) : bool
-  {
-    if (isset($this->cookies[$name])) return true;
-    return false;
-  }
-
-  /**
-   * Request has header
-   *
-   * @param  string $name
-   * @return bool
-   */
-  public function hasHeader($name) : bool
-  {
-    if (isset($this->headers[$name])) return true;
-    return false;
-  }
-
-  /**
    * Get request input
    *
    * @param  string $name
@@ -288,11 +287,6 @@ class Request
     return $this->files[$name];
   }
 
-  public function move(string $destination) : bool
-  {
-    dd($this);
-  }
-
   /**
    * Get request cookie
    *
@@ -301,7 +295,18 @@ class Request
    */
   public function cookie($name)
   {
-    return $this->cookies[$name];
+    return $this->cookies->get($name);
+  }
+
+  /**
+   * Get server
+   *
+   * @param mixed $name
+   * @return void
+   */
+  public function server($name)
+  {
+    return $this->server->get($name);
   }
 
   /**
@@ -312,7 +317,7 @@ class Request
    */
   public function header($name)
   {
-    return $this->headers[$name];
+    return $this->headers->get($name);
   }
 
   /**
@@ -352,7 +357,7 @@ class Request
    */
   public function cookies() : array
   {
-    return $this->cookies;
+    return $this->cookies->all();
   }
 
   /**
@@ -373,6 +378,17 @@ class Request
   public function method() : string
   {
     return $this->method;
+  }
+
+  /**
+   * Check if method equals value
+   *
+   * @param string $method
+   * @return bool
+   */
+  public function isMethod(string $method) : bool
+  {
+    return strtolower($this->method) == strtolower($method);
   }
 
   /**
@@ -403,6 +419,16 @@ class Request
   public function url() : string
   {
     return $this->url;
+  }
+
+  /**
+   * Get current route
+   *
+   * @return object
+   */
+  public function route() : object
+  {
+    return (object)Route::current();
   }
 
   /**
@@ -481,20 +507,18 @@ class Request
     if (is_callable($closure)) {
       $custom = call_user_func($closure, $response);
 
+      if ($custom instanceOf Model) return $custom;
+
       if (is_array($custom)) {
         foreach($custom as $key => $unique) {
-          if ($key !== '__MUST_RETURN__') {
-            $response->errors()->add($key, $unique);
-          } else {
-            return $unique;
-          }
+          $response->errors()->add($key, $unique);
         }
       }
     }
 
     if (count($response->errors()) > 0 || $response->fails()) {
       if ($this->isAjax()) {
-        response()->json($response->errors()->toArray(), 422);
+        Rest::response()->json($response->errors()->toArray(), 422);
         die();
       }
 
@@ -507,7 +531,7 @@ class Request
             ->code(302)
             ->send();
       } else {
-        response()->json($response->errors()->toArray(), 422);
+        Rest::response()->json($response->errors()->toArray(), 422);
         die();
       }
     }
