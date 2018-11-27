@@ -13,7 +13,7 @@
     "modulusphp/utility": "^1.9.3",
     "modulusphp/security": "^1.9.1",
     "rbdwllr/reallysimplejwt": "^1.0",
-    "atlantisphp/swish": "^1.5.1"
+    "atlantisphp/swish": "^1.5.1.1"
   },
   "autoload": {
     "psr-4": {
