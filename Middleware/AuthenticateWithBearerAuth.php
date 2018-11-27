@@ -24,6 +24,8 @@ class AuthenticateWithBearerAuth
     ) {
       return $continue;
     }
+
+    $this->response('Unauthorized', 401);
   }
 
   /**
@@ -108,7 +110,7 @@ class AuthenticateWithBearerAuth
    *
    * @return void
    */
-  protected function response($message, $code) : rest
+  protected function response($message, $code)
   {
     return Rest::response()->json([
       'status' => $message,
