@@ -34,7 +34,7 @@ class AuthenticateWithBearerAuth
    */
   protected function hasBearerAuth($request) : bool
   {
-    if ($request->header->has('Authorization') && starts_with($request->header('Authorization'), 'Bearer ')) {
+    if ($request->headers->has('Authorization') && starts_with($request->header('Authorization'), 'Bearer ')) {
       return true;
     }
 
