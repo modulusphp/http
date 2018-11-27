@@ -57,7 +57,6 @@ class AuthenticateWithBearerAuth
     }
     catch (TokenValidatorException $e) {
       $this->fails($e);
-      cancel();
     }
 
     $userid   = $payLoad['iss'];
@@ -115,5 +114,7 @@ class AuthenticateWithBearerAuth
       'status' => $message,
       'code' => $code
     ], $code);
+
+    cancel();
   }
 }
