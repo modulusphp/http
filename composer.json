@@ -9,9 +9,9 @@
     "email": "donaldpakkies@gmail.com"
   }],
   "require": {
-    "modulusphp/request": "^1.9.0",
-    "modulusphp/utility": "^1.9.3",
-    "modulusphp/security": "^1.9.1",
+    "modulusphp/request": "1.9.*",
+    "modulusphp/utility": "1.9.*",
+    "modulusphp/security": "1.9.*",
     "rbdwllr/reallysimplejwt": "^1.0",
     "atlantisphp/swish": "^1.5.1.1"
   },
