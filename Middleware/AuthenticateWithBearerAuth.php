@@ -24,6 +24,8 @@ class AuthenticateWithBearerAuth
     ) {
       return $continue;
     }
+
+    $this->response('Unauthorized', 401);
   }
 
   /**
@@ -34,7 +36,7 @@ class AuthenticateWithBearerAuth
    */
   protected function hasBearerAuth($request) : bool
   {
-    if ($request->header->has('Authorization') && starts_with($request->header('Authorization'), 'Bearer ')) {
+    if ($request->headers->has('Authorization') && starts_with($request->header('Authorization'), 'Bearer ')) {
       return true;
     }
 
@@ -57,7 +59,6 @@ class AuthenticateWithBearerAuth
     }
     catch (TokenValidatorException $e) {
       $this->fails($e);
-      cancel();
     }
 
     $userid   = $payLoad['iss'];
@@ -109,11 +110,13 @@ class AuthenticateWithBearerAuth
    *
    * @return void
    */
-  protected function response($message, $code) : rest
+  protected function response($message, $code)
   {
     return Rest::response()->json([
       'status' => $message,
       'code' => $code
     ], $code);
+
+    cancel();
   }
 }
