@@ -229,7 +229,7 @@ class Request
    * @param  array  $data
    * @return Request
    */
-  public function add(array $data = []) : array
+  public function add(array $data = []) : Request
   {
     $this->data = array_merge($this->data, $data);
 
