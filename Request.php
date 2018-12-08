@@ -517,7 +517,7 @@ class Request
     }
 
     if (count($response->errors()) > 0 || $response->fails()) {
-      if ($this->headers->has('Content-Type') &&  str_contains(strtolower($this->headers->get('Content-Type')), ['json', 'javascript'])) {
+      if ($this->headers->has('Content-Type') &&  str_contains(strtolower($this->headers->get('Content-Type')), 'json')) {
         Rest::response()->json($response->errors()->toArray(), 422);
         die();
       }
@@ -525,7 +525,7 @@ class Request
       $url = ($this->server->has('HTTPS') ? 'https://' : 'http://') . $this->server->get('HTTP_HOST');
 
       if ($this->server->has('HTTP_ORIGIN') && $this->server->get('HTTP_ORIGIN') == $url) {
-        $referer = $this->server->get('HTTP_ORIGIN');
+        $referer = $this->headers->get('Referer');
 
         Redirect::to($referer)
             ->with('validation.errors', $response->errors())
