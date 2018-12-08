@@ -19,6 +19,8 @@ class MustHandleCors
       $this->cors($request);
     }
 
+    if ($request->isMethod('options')) exit;
+
     return $continue;
   }
 
