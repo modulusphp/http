@@ -88,7 +88,7 @@ class VerifyCsrfToken
   {
     if (!isset( $_SESSION['_saini']) || !$_SESSION['_saini']) return false;
 
-    $csrfToken = $request->has('csrf_token') ? $request->input('csrf_token') : ($request->hasHeader('X-CSRF-TOKEN') ? $request->header('X-CSRF-TOKEN') : null);
+    $csrfToken = $request->has('csrf_token') ? $request->input('csrf_token') : ($request->headers->has('X-CSRF-TOKEN') ? $request->header('X-CSRF-TOKEN') : null);
     $sessionToken =  $_SESSION['_saini'];
 
     if (!hash_equals($sessionToken, $csrfToken)) {
