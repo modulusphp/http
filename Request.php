@@ -198,7 +198,8 @@ class Request
         str_contains(strtolower(getallheaders()['Content-Type']), 'javascript')
       )
     ) {
-      $this->data = array_merge($this->data, json_decode(file_get_contents("php://input"), true));
+      $json = json_decode(file_get_contents("php://input"), true);
+      $this->data = array_merge($this->data, is_array($json) ? $json : []);
     }
 
     if ($this->data !== []) {
