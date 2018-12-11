@@ -4,7 +4,7 @@ namespace Modulus\Http\Middleware;
 
 use Modulus\Http\Status;
 use Modulus\Utility\Events;
-use Modulus\Framework\Exceptions\NotFoundHttpException;
+use Modulus\Http\Exceptions\NotFoundHttpException;
 
 class MustHideRoutes
 {
