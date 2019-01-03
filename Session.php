@@ -41,4 +41,16 @@ class Session
 
     $_SESSION[$key] = $value;
   }
+
+  /**
+  * Create a flash message
+  *
+  * @param string $key
+  * @param mixed $value
+  * @return
+  */
+  public static function flash(string $key, $value = null)
+  {
+    return $_SESSION['application']['with'] = [$key => $value];
+  }
 }

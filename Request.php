@@ -222,6 +222,40 @@ class Request
     $this->isAjax  = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
                             ($_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest'));
 
+    if ($this->rules == [] && count(is_array($this->rules()) ? $this->rules() : []) > 0) {
+      $this->rules = $this->rules();
+    }
+
+    if (count(is_array($this->rules) ? $this->rules : [])  > 0 && $this->has('csrf_token')) $this->validate();
+  }
+
+  /**
+   * Form rules
+   *
+   * @return array
+   */
+  public function rules() : array
+  {
+    return [];
+  }
+
+  /**
+   * Grab selected fields.
+   *
+   * @param array $array
+   * @return array $data
+   */
+  public function only(array $array)
+  {
+    $data = [];
+
+    foreach($array as $field) {
+      if ($this->has($field)) {
+        $data[$field] = $this->data[$field];
+      }
+    }
+
+    return $data;
   }
 
   /**
