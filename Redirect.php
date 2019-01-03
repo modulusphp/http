@@ -181,7 +181,8 @@ class Redirect
     if (!array_key_exists($this->code, Status::CODE)) return false;
 
     if ($this->with !== null || $this->with !== []) {
-      $_SESSION['application']['with'] = $this->with;
+      $data = array_merge(isset($_SESSION['application']['with']) ? $_SESSION['application']['with'] : [], $this->with);
+      $_SESSION['application']['with'] = $data;
     }
 
     header('Location: ' . $this->url);
