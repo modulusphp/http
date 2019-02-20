@@ -9,7 +9,6 @@ use Modulus\Request\Server;
 use AtlantisPHP\Swish\Route;
 use Modulus\Request\Cookies;
 use Modulus\Request\Headers;
-use Modulus\Utility\Validate;
 use JeffOchoa\ValidatorFactory;
 use Illuminate\Database\Eloquent\Model;
 
