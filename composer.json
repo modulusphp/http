@@ -1,7 +1,7 @@
 {
   "name": "modulusphp/http",
   "description": "Http component for Modulus",
-  "version": "1.9.4.10",
+  "version": "1.9.4.11",
   "license": "MIT",
   "type": "package",
   "authors": [{
