@@ -54,7 +54,7 @@ class Rest
    * @param  array   $headers
    * @return Rest
    */
-  public static function response(string $message = null, int $code = null, array $headers = []) : Rest
+  public static function response(string $message = null, int $code = null, array $headers = [])
   {
     $rest = new Rest;
     $rest->message = $message;
@@ -81,7 +81,7 @@ class Rest
    * @param  integer $code
    * @return Rest
    */
-  public function json(array $array = [], int $code = null) : Rest
+  public function json(array $array = [], int $code = null)
   {
     $this->data = $array;
 
@@ -113,7 +113,7 @@ class Rest
    * @param  array  $array
    * @return Rest
    */
-  public function withHeaders(array $array, int $code = null) : Rest
+  public function withHeaders(array $array, int $code = null)
   {
     foreach($array as $field => $i) {
       array_push($this->headers, $field .': '. $i);
@@ -230,7 +230,7 @@ class Rest
    *
    * @return Rest
    */
-  public function send() : Rest
+  public function send()
   {
     foreach($this->headers as $header) {
       header($header);
