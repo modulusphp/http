@@ -246,7 +246,7 @@ class Rest
 
     if (is_array($response)) {
       echo json_encode($response);
-      return $this;
+      return;
     }
 
     echo $response;
