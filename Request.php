@@ -9,7 +9,7 @@ use Modulus\Request\Server;
 use AtlantisPHP\Swish\Route;
 use Modulus\Request\Cookies;
 use Modulus\Request\Headers;
-use Modulus\Utility\Validate;
+use JeffOchoa\ValidatorFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Request
@@ -226,7 +226,16 @@ class Request
       $this->rules = $this->rules();
     }
 
-    if (count(is_array($this->rules) ? $this->rules : [])  > 0 && $this->has('csrf_token')) $this->validate();
+    /**
+     * Run the validate method if request has rules, and
+     * the csrf token is present.
+     */
+    if (
+      count(is_array($this->rules) ? $this->rules : [])  > 0 &&
+      ($this->has('csrf_token') || $this->headers->has('X-CSRF-TOKEN'))
+    ) {
+      $this->validate();
+    }
   }
 
   /**
@@ -537,7 +546,11 @@ class Request
    */
   public function validate(?Closure $closure = null)
   {
-    $response = validate::make($this->data(), isset($this->rules) ? $this->rules : []);
+    /**
+     * Create a new validation factory
+     */
+    $factory = new ValidatorFactory();
+    $response = $factory->make($this->data(), isset($this->rules) ? $this->rules : []);
 
     if (is_callable($closure)) {
       $custom = call_user_func($closure, $response);
