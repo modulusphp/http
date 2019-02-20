@@ -226,7 +226,16 @@ class Request
       $this->rules = $this->rules();
     }
 
-    if (count(is_array($this->rules) ? $this->rules : [])  > 0 && $this->has('csrf_token')) $this->validate();
+    /**
+     * Run the validate method if request has rules, and
+     * the csrf token is present.
+     */
+    if (
+      count(is_array($this->rules) ? $this->rules : [])  > 0 &&
+      ($this->has('csrf_token') || $this->headers->has('X-CSRF-TOKEN'))
+    ) {
+      $this->validate();
+    }
   }
 
   /**
