@@ -250,6 +250,5 @@ class Rest
     }
 
     echo $response;
-    return $this;
   }
 }
