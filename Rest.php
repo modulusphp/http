@@ -4,9 +4,12 @@ namespace Modulus\Http;
 
 use Modulus\Http\Status;
 use Modulus\Utility\View;
+use Modulus\Support\Extendable;
 
 class Rest
 {
+  use Extendable;
+
   /**
    * $data
    *

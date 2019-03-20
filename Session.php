@@ -2,8 +2,12 @@
 
 namespace Modulus\Http;
 
+use Modulus\Support\Extendable;
+
 class Session
 {
+  use Extendable;
+
   /**
    * Check if session has key
    *

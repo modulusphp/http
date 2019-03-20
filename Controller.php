@@ -3,9 +3,12 @@
 namespace Modulus\Http;
 
 use Modulus\Utility\View;
+use Modulus\Support\Extendable;
 
 class Controller
 {
+  use Extendable;
+
   /**
    * $middleware
    *

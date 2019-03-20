@@ -1,7 +1,7 @@
 {
   "name": "modulusphp/http",
   "description": "Http component for Modulus",
-  "version": "1.9.5.1",
+  "version": "1.9.5.2",
   "license": "MIT",
   "type": "package",
   "authors": [{
@@ -12,6 +12,7 @@
     "modulusphp/request": "1.9.*",
     "modulusphp/utility": "1.9.*",
     "modulusphp/security": "1.9.*",
+    "modulusphp/support": "1.9.*",
     "rbdwllr/reallysimplejwt": "^1.0",
     "atlantisphp/swish": "1.5.*"
   },
