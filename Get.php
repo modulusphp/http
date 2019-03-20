@@ -2,8 +2,12 @@
 
 namespace Modulus\Http;
 
+use Modulus\Support\Extendable;
+
 class Get
 {
+  use Extendable;
+
   /**
    * Check if query contains key
    *

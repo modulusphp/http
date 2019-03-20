@@ -10,10 +10,13 @@ use AtlantisPHP\Swish\Route;
 use Modulus\Request\Cookies;
 use Modulus\Request\Headers;
 use JeffOchoa\ValidatorFactory;
+use Modulus\Support\Extendable;
 use Illuminate\Database\Eloquent\Model;
 
 class Request
 {
+  use Extendable;
+
   /**
    * Request::GET
    */

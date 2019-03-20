@@ -4,9 +4,12 @@ namespace Modulus\Http;
 
 use Modulus\Http\Route;
 use Modulus\Http\Status;
+use Modulus\Support\Extendable;
 
 class Redirect
 {
+  use Extendable;
+
   /**
    * Redirect Url
    *

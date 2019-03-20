@@ -2,8 +2,12 @@
 
 namespace Modulus\Http;
 
+use Modulus\Support\Extendable;
+
 class Status
 {
+  use Extendable;
+
   /**
    * Status::CODE
    *
