@@ -87,7 +87,7 @@ class ForgotPasswordController
    */
   public function showForgotPasswordPage()
   {
-    View::make('app.auth.password.forgot');
+    return View::make('app.auth.password.forgot');
   }
 
   /**
@@ -97,7 +97,7 @@ class ForgotPasswordController
    */
   public function showResetPasswordPage()
   {
-    View::make('app.auth.password.reset');
+    return View::make('app.auth.password.reset');
   }
 
   /**
