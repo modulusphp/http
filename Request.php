@@ -10,7 +10,7 @@ use Modulus\Http\Request\HasInput;
 use Modulus\Http\Request\HasRequest;
 use Modulus\Http\Request\HasValidation;
 
-class Request extends Base
+final class Request extends Base
 {
   use HasInput;
   use HasRequest;

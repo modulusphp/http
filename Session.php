@@ -4,7 +4,7 @@ namespace Modulus\Http;
 
 use Modulus\Support\Extendable;
 
-class Session
+final class Session
 {
   use Extendable;
 

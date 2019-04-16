@@ -4,7 +4,7 @@ namespace Modulus\Http;
 
 use Modulus\Support\Extendable;
 
-class Status
+final class Status
 {
   use Extendable;
 

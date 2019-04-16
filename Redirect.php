@@ -6,7 +6,7 @@ use Modulus\Http\Route;
 use Modulus\Http\Status;
 use Modulus\Support\Extendable;
 
-class Redirect
+final class Redirect
 {
   use Extendable;
 

@@ -113,7 +113,7 @@ class AuthenticateWithBearerAuth
    */
   protected function response($message, $code)
   {
-    return Rest::response()->json([
+    Rest::response()->json([
       'status' => $message,
       'code' => $code
     ], $code);

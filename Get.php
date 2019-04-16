@@ -4,7 +4,7 @@ namespace Modulus\Http;
 
 use Modulus\Support\Extendable;
 
-class Get
+final class Get
 {
   use Extendable;
 

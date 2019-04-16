@@ -2,7 +2,7 @@
 
 namespace Modulus\Http;
 
-class UrlGenerator
+final class UrlGenerator
 {
   /**
    * Generate url
