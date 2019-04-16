@@ -6,7 +6,7 @@ use Modulus\Http\Status;
 use Modulus\Utility\View;
 use Modulus\Support\Extendable;
 
-class Rest
+final class Rest
 {
   use Extendable;
 
