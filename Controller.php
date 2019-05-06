@@ -59,17 +59,4 @@ class Controller
 
     return $response;
   }
-
-  /**
-   * Validate request
-   *
-   * @param Request $request
-   * @param array $rules
-   * @return void
-   */
-  public function validate(Request $request, array $rules = [])
-  {
-    $request->rules = $rules;
-    return $request->validate();
-  }
 }
