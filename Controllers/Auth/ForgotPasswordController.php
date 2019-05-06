@@ -45,7 +45,7 @@ class ForgotPasswordController
     return Notification::make(new MustResetPassword($email, $token));
   }
 
-   /**
+  /**
    * Redirect user after sending the reset password notification
    *
    * @return void
@@ -163,10 +163,9 @@ class ForgotPasswordController
         if (Session::key('_reset') == $userToken->token) {
           return config("auth.provider.{$provider}.model")::where($musked, $userEmail)->first();
         }
-        else {
-          Session::delete('_reset');
-          return false;
-        }
+
+        Session::delete('_reset');
+        return false;
       }
     }
 
