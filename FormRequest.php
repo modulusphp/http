@@ -7,7 +7,7 @@ use Modulus\Http\Request\HasInput;
 use Modulus\Http\Request\HasRequest;
 use Modulus\Http\Request\HasValidation;
 
-final class Request extends Base
+class FormRequest extends Base
 {
   use HasInput;
   use HasRequest;
