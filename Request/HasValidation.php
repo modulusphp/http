@@ -18,11 +18,28 @@ trait HasValidation
   public $rules = [];
 
   /**
+   * Error messages
+   *
+   * @var $messages
+   */
+  public $messages = [];
+
+  /**
    * Form rules
    *
    * @return array
    */
   public function rules() : array
+  {
+    return [];
+  }
+
+  /**
+   * Form error messages
+   *
+   * @return array
+   */
+  public function messages() : array
   {
     return [];
   }
@@ -38,7 +55,7 @@ trait HasValidation
      * Create a new validation factory
      */
     $factory = new ValidatorFactory();
-    $response = $factory->make($this->data(), isset($this->rules) ? $this->rules : []);
+    $response = $factory->make($this->data(), isset($this->rules) ? $this->rules : [], isset($this->messages) ? $this->messages : []);
 
     if (is_callable($closure)) {
       $custom = call_user_func($closure, $response);
