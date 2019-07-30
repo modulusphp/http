@@ -112,17 +112,13 @@ class Base
    */
   public function __construct(?array $data = [])
   {
-    $this->data = $data = array_merge($_POST, $_FILES);;
+    $this->data = $data = array_merge($_POST, $_FILES);
 
-    if (
-      isset(getallheaders()['Content-Type']) &&
-      (
-        str_contains(strtolower(getallheaders()['Content-Type']), 'json') ||
-        str_contains(strtolower(getallheaders()['Content-Type']), 'javascript')
-      )
-    ) {
+    try {
       $json = json_decode(file_get_contents("php://input"), true);
       $this->data = array_merge($this->data, is_array($json) ? $json : []);
+    } catch (Exception $e) {
+      // do nothing
     }
 
     if ($this->data !== []) {
@@ -147,6 +143,10 @@ class Base
 
     if ($this->rules == [] && count(is_array($this->rules()) ? $this->rules() : []) > 0) {
       $this->rules = $this->rules();
+    }
+
+    if ($this->messages == [] && count(is_array($this->messages()) ? $this->messages() : []) > 0) {
+      $this->messages = $this->messages();
     }
 
     /**
