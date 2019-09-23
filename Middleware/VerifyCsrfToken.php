@@ -56,7 +56,7 @@ class VerifyCsrfToken
   /**
    * Determine if the HTTP request uses a ‘read’ verb.
    *
-   * @param  \Modulus\Http\Request  $request
+   * @param \Modulus\Http\Request $request
    * @return bool
    */
   protected function isReading($request) : bool
@@ -65,10 +65,10 @@ class VerifyCsrfToken
   }
 
   /**
-   * shouldIgnore
+   * Check if request should be ignored
    *
-   * @param  \Modulus\Http\Request  $request
-   * @return void
+   * @param \Modulus\Http\Request $request
+   * @return bool
    */
   protected function shouldIgnore($request) : bool
   {
@@ -79,10 +79,10 @@ class VerifyCsrfToken
   }
 
   /**
-   * tokenMatches
+   * Check if token matches
    *
-   * @param  \Modulus\Http\Request  $request
-   * @return void
+   * @param \Modulus\Http\Request $request
+   * @return bool
    */
   protected function tokenMatches($request) : bool
   {
@@ -99,10 +99,10 @@ class VerifyCsrfToken
   }
 
   /**
-   * hasNotExpired
+   * Check if token has not expired
    *
-   * @param  \Modulus\Http\Request  $request
-   * @return void
+   * @param \Modulus\Http\Request $request
+   * @return bool
    */
   protected function hasNotExpired($request) : bool
   {
