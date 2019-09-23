@@ -97,6 +97,27 @@ class VerifyCsrfToken
   }
 
   /**
+   * Get csrf token
+   *
+   * @param mixed $request
+   * @return string
+   */
+  private function getCsrfToken($request) : string
+  {
+    if ($request->has('csrf_token')) {
+      return $request->csrf_token;
+    }
+
+    foreach($request->headers() as $header => $value) {
+      if (strtoupper($header) == 'X-CSRF-TOKEN') {
+        return $value;
+      }
+    }
+
+    return '';
+  }
+
+  /**
    * Check if token has not expired
    *
    * @param \Modulus\Http\Request $request
