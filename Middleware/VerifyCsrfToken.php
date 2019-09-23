@@ -33,7 +33,8 @@ class VerifyCsrfToken
    * Handle middleware
    *
    * @param Request $request
-   * @param mixed $continue
+   * @param bool $continue
+   * @throws TokenMismatchException
    * @return bool
    */
   public function handle($request, $continue) : bool
@@ -73,27 +74,46 @@ class VerifyCsrfToken
    */
   protected function shouldIgnore($request) : bool
   {
-    return in_array($request->path(), $this->createUrl($request, 'except')) ? true : false;
+    /** create url */
+    $this->createUrl(
+      $request,
+      'except'
+    );
+
+    return in_array($request->path(), $this->except) ? true : false;
   }
 
   /**
-   * Check if token is valid
+   * Check if token matches
    *
    * @param \Modulus\Http\Request $request
    * @return bool
    */
   protected function tokenMatches($request) : bool
   {
-    if (!isset( $_SESSION['_saini']) || !$_SESSION['_saini']) return false;
+    if (!isset($_SESSION['_session_token']) || !$_SESSION['_session_token']) return false;
 
-    $csrfToken = $request->has('csrf_token') ? $request->input('csrf_token') : ($request->headers->has('X-CSRF-TOKEN') ? $request->header('X-CSRF-TOKEN') : null);
-    $sessionToken =  $_SESSION['_saini'];
+    return hash_equals($_SESSION['_session_token'], $this->getCsrfToken($request)) ? true : false;
+  }
 
-    if (!hash_equals($sessionToken, $csrfToken)) {
-      return false;
+  /**
+   * Get csrf token
+   *
+   * @param mixed $request
+   */
+  private function getCsrfToken($request) : string
+  {
+    if ($request->has('csrf_token')) {
+      return $request->input('csrf_token');
     }
 
-    return true;
+    foreach($request->headers() as $header => $value) {
+      if (strtoupper($header) == 'X-CSRF-TOKEN') {
+        return $value;
+      }
+    }
+
+    return '';
   }
 
   /**
@@ -104,13 +124,13 @@ class VerifyCsrfToken
    */
   protected function hasNotExpired($request) : bool
   {
-    if (!isset($_SESSION['_cksal'])) return false;
+    if (!isset($_SESSION['_session_stamp'])) return false;
 
     $this->createUrl($request, 'expire');
 
     if (in_array($request->path(), $this->canExpire)) return true;
 
-    $time = $_SESSION['_cksal'];
+    $time = $_SESSION['_session_stamp'];
     $time = base64_decode($time);
 
     $expire = config('auth.expire.session_token');
@@ -126,8 +146,8 @@ class VerifyCsrfToken
   /**
    * Create url
    *
-   * @param \Modulus\Http\Request $request
-   * @param string $type
+   * @param  \Modulus\Http\Request  $request
+   * @param  string  $type
    * @return void
    */
   private function createUrl($request, string $type)
