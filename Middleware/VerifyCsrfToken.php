@@ -32,7 +32,9 @@ class VerifyCsrfToken
   /**
    * Handle middleware
    *
-   * @param  Request $request
+   * @param Request $request
+   * @param bool $continue
+   * @throws TokenMismatchException
    * @return bool
    */
   public function handle($request, $continue) : bool
