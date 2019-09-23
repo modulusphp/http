@@ -32,7 +32,8 @@ class VerifyCsrfToken
   /**
    * Handle middleware
    *
-   * @param  Request $request
+   * @param Request $request
+   * @param mixed $continue
    * @return bool
    */
   public function handle($request, $continue) : bool
@@ -56,7 +57,7 @@ class VerifyCsrfToken
   /**
    * Determine if the HTTP request uses a ‘read’ verb.
    *
-   * @param  \Modulus\Http\Request  $request
+   * @param \Modulus\Http\Request $request
    * @return bool
    */
   protected function isReading($request) : bool
@@ -65,24 +66,21 @@ class VerifyCsrfToken
   }
 
   /**
-   * shouldIgnore
+   * Check if request should be ignored
    *
-   * @param  \Modulus\Http\Request  $request
-   * @return void
+   * @param \Modulus\Http\Request $request
+   * @return bool
    */
   protected function shouldIgnore($request) : bool
   {
-    $this->createUrl($request, 'except');
-    if (in_array($request->path(), $this->except)) return true;
-
-    return false;
+    return in_array($request->path(), $this->createUrl($request, 'except')) ? true : false;
   }
 
   /**
-   * tokenMatches
+   * Check if token is valid
    *
-   * @param  \Modulus\Http\Request  $request
-   * @return void
+   * @param \Modulus\Http\Request $request
+   * @return bool
    */
   protected function tokenMatches($request) : bool
   {
@@ -99,10 +97,10 @@ class VerifyCsrfToken
   }
 
   /**
-   * hasNotExpired
+   * Check if token has not expired
    *
-   * @param  \Modulus\Http\Request  $request
-   * @return void
+   * @param \Modulus\Http\Request $request
+   * @return bool
    */
   protected function hasNotExpired($request) : bool
   {
@@ -128,8 +126,8 @@ class VerifyCsrfToken
   /**
    * Create url
    *
-   * @param  \Modulus\Http\Request  $request
-   * @param  string  $type
+   * @param \Modulus\Http\Request $request
+   * @param string $type
    * @return void
    */
   private function createUrl($request, string $type)
