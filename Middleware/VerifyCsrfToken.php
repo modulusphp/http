@@ -74,10 +74,13 @@ class VerifyCsrfToken
    */
   protected function shouldIgnore($request) : bool
   {
-    $this->createUrl($request, 'except');
-    if (in_array($request->path(), $this->except)) return true;
+    /** create url */
+    $this->createUrl(
+      $request,
+      'except'
+    );
 
-    return false;
+    return in_array($request->path(), $this->except) ? true : false;
   }
 
   /**
