@@ -86,16 +86,29 @@ class VerifyCsrfToken
    */
   protected function tokenMatches($request) : bool
   {
-    if (!isset( $_SESSION['_session_token']) || !$_SESSION['_session_token']) return false;
+    if (!isset($_SESSION['_session_token']) || !$_SESSION['_session_token']) return false;
 
-    $csrfToken = $request->has('csrf_token') ? $request->input('csrf_token') : ($request->headers->has('X-CSRF-TOKEN') ? $request->header('X-CSRF-TOKEN') : null);
-    $sessionToken =  $_SESSION['_session_token'];
+    return hash_equals($_SESSION['_session_token'], $this->getCsrfToken($request)) ? true : false;
+  }
 
-    if (!hash_equals($sessionToken, $csrfToken)) {
-      return false;
+  /**
+   * Get csrf token
+   *
+   * @param mixed $request
+   */
+  private function getCsrfToken($request) : string
+  {
+    if ($request->has('csrf_token')) {
+      return $request->input('csrf_token');
     }
 
-    return true;
+    foreach($request->headers() as $header => $value) {
+      if (strtoupper($header) == 'X-CSRF-TOKEN') {
+        return $value;
+      }
+    }
+
+    return '';
   }
 
   /**
