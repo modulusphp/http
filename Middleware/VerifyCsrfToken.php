@@ -32,8 +32,7 @@ class VerifyCsrfToken
   /**
    * Handle middleware
    *
-   * @param Request $request
-   * @param mixed $continue
+   * @param  Request $request
    * @return bool
    */
   public function handle($request, $continue) : bool
@@ -57,7 +56,7 @@ class VerifyCsrfToken
   /**
    * Determine if the HTTP request uses a ‘read’ verb.
    *
-   * @param \Modulus\Http\Request $request
+   * @param  \Modulus\Http\Request  $request
    * @return bool
    */
   protected function isReading($request) : bool
@@ -66,68 +65,54 @@ class VerifyCsrfToken
   }
 
   /**
-   * Check if request should be ignored
+   * shouldIgnore
    *
-   * @param \Modulus\Http\Request $request
-   * @return bool
+   * @param  \Modulus\Http\Request  $request
+   * @return void
    */
   protected function shouldIgnore($request) : bool
   {
-    return in_array($request->path(), $this->createUrl($request, 'except')) ? true : false;
+    $this->createUrl($request, 'except');
+    if (in_array($request->path(), $this->except)) return true;
+
+    return false;
   }
 
   /**
-   * Check if token is valid
+   * tokenMatches
    *
-   * @param \Modulus\Http\Request $request
-   * @return bool
+   * @param  \Modulus\Http\Request  $request
+   * @return void
    */
   protected function tokenMatches($request) : bool
   {
-    if (!isset($_SESSION['_session_token']) || !$_SESSION['_session_token']) return false;
+    if (!isset( $_SESSION['_saini']) || !$_SESSION['_saini']) return false;
 
-    $csrfToken    = $this->getCsrfToken($request);
-    $sessionToken = $_SESSION['_session_token'];
+    $csrfToken = $request->has('csrf_token') ? $request->input('csrf_token') : ($request->headers->has('X-CSRF-TOKEN') ? $request->header('X-CSRF-TOKEN') : null);
+    $sessionToken =  $_SESSION['_saini'];
 
-    return hash_equals($sessionToken, $csrfToken) ? true : false;
+    if (!hash_equals($sessionToken, $csrfToken)) {
+      return false;
+    }
+
+    return true;
   }
 
   /**
-   * Get csrf token
+   * hasNotExpired
    *
-   * @param mixed $request
-   * @return string
-   */
-  private function getCsrfToken($request) : string
-  {
-    if ($request->has('csrf_token')) {
-      return $request->csrf_token;
-    }
-
-    foreach($request->headers() as $header => $value) {
-      if (strtoupper($header) == 'X-CSRF-TOKEN') {
-        return $value;
-      }
-    }
-
-    return '';
-  }
-
-  /**
-   * Check if token has not expired
-   *
-   * @param \Modulus\Http\Request $request
-   * @return bool
+   * @param  \Modulus\Http\Request  $request
+   * @return void
    */
   protected function hasNotExpired($request) : bool
   {
-    if (!isset($_SESSION['_session_stamp'])) return false;
+    if (!isset($_SESSION['_cksal'])) return false;
 
     $this->createUrl($request, 'expire');
 
     if (in_array($request->path(), $this->canExpire)) return true;
 
-    $time = $_SESSION['_session_stamp'];
+    $time = $_SESSION['_cksal'];
     $time = base64_decode($time);
 
     $expire = config('auth.expire.session_token');
@@ -143,8 +128,8 @@ class VerifyCsrfToken
   /**
    * Create url
    *
-   * @param \Modulus\Http\Request $request
-   * @param string $type
+   * @param  \Modulus\Http\Request  $request
+   * @param  string  $type
    * @return void
    */
   private function createUrl($request, string $type)

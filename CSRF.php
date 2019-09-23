@@ -14,10 +14,10 @@ class CSRF
    */
   public static function generate()
   {
-    $_SESSION['_session_stamp'] = self::genTimeStamp();
-    $_SESSION['_session_token'] = bin2hex(random_bytes(30));
+    $_SESSION['_cksal'] = self::genTimeStamp();
+    $_SESSION['_saini'] = bin2hex(random_bytes(30));
 
-    return $_SESSION['_session_token'];
+    return $_SESSION['_saini'];
   }
 
   /**
