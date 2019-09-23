@@ -86,10 +86,10 @@ class VerifyCsrfToken
    */
   protected function tokenMatches($request) : bool
   {
-    if (!isset( $_SESSION['_saini']) || !$_SESSION['_saini']) return false;
+    if (!isset( $_SESSION['_session_token']) || !$_SESSION['_session_token']) return false;
 
     $csrfToken = $request->has('csrf_token') ? $request->input('csrf_token') : ($request->headers->has('X-CSRF-TOKEN') ? $request->header('X-CSRF-TOKEN') : null);
-    $sessionToken =  $_SESSION['_saini'];
+    $sessionToken =  $_SESSION['_session_token'];
 
     if (!hash_equals($sessionToken, $csrfToken)) {
       return false;
@@ -106,13 +106,13 @@ class VerifyCsrfToken
    */
   protected function hasNotExpired($request) : bool
   {
-    if (!isset($_SESSION['_cksal'])) return false;
+    if (!isset($_SESSION['_session_stamp'])) return false;
 
     $this->createUrl($request, 'expire');
 
     if (in_array($request->path(), $this->canExpire)) return true;
 
-    $time = $_SESSION['_cksal'];
+    $time = $_SESSION['_session_stamp'];
     $time = base64_decode($time);
 
     $expire = config('auth.expire.session_token');
