@@ -45,7 +45,7 @@ trait HasInput
    * @param  array  $data
    * @return Request
    */
-  public function add(array $data = []) : Request
+  public function add(array $data = [])
   {
     $this->data = array_merge($this->data, $data);
 
