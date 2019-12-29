@@ -2,8 +2,7 @@
 
 namespace Modulus\Http;
 
-use Modulus\Http\Request;
-use Modulus\Utility\Events;
+use Modulus\Hibernate\Session;
 
 class CSRF
 {
@@ -14,10 +13,10 @@ class CSRF
    */
   public static function generate()
   {
-    $_SESSION['_session_stamp'] = self::genTimeStamp();
-    $_SESSION['_session_token'] = bin2hex(random_bytes(30));
+    Session::flash()->set('_session_stamp', self::genTimeStamp());
+    Session::flash()->set('_session_token', bin2hex(random_bytes(30)));
 
-    return $_SESSION['_session_token'];
+    return Session::flash()->get('_session_token');
   }
 
   /**
