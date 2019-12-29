@@ -25,9 +25,9 @@ class Authenticate
   /**
    * Get the path the user should be redirected to when they are not authenticated.
    *
-   * @return void
+   * @return Redirect
    */
-  protected function redirectTo()
+  protected function redirectTo() : Redirect
   {
     return Redirect::to('/login')->return(302);
   }
