@@ -42,7 +42,7 @@ class AuthenticateWithBasicAuth
    * Handle middleware
    *
    * @param \Modulus\Http\Request $request
-   * @return mixed
+   * @return bool|null
    */
   public function handle($request, $continue)
   {
@@ -93,11 +93,7 @@ class AuthenticateWithBasicAuth
    */
   protected function hasBasicAuth($request) : bool
   {
-    if ($request->headers->has('Authorization') && starts_with($request->header('Authorization'), 'Basic ')) {
-      return true;
-    }
-
-    return false;
+    return $request->headers->has('Authorization') && starts_with($request->header('Authorization'), 'Basic ');
   }
 
   /**
@@ -108,9 +104,7 @@ class AuthenticateWithBasicAuth
    */
   protected function hasBase64Enc($request) : bool
   {
-    if (is_base64(substr($request->header('Authorization'), 6))) return true;
-
-    return false;
+    return is_base64(substr($request->header('Authorization'), 6));
   }
 
   /**
@@ -147,26 +141,20 @@ class AuthenticateWithBasicAuth
   /**
    * addAccessToken
    *
-   * @param mixed $request
-   * @return void
+   * @param \Modulus\Http\Request $request
+   * @return \Modulus\Http\Request $request
    */
   protected function withAccessToken($request)
   {
-    $hash   = explode(':', config('app.key'))[0];
-    $secret = explode(':', config('app.key'))[1];
     $expire = strtotime(config('auth.expire.access_token'));
 
-    if ($hash == 'base64') $secret = base64_decode($secret);
-
     $token = (new TokenBuilder())->addPayload(['key' => 'pro', 'value' => $this->provider])
-        ->setSecret($secret)
+        ->setSecret(app()->getKey())
         ->setExpiration($expire)
         ->setIssuer(Auth::user()->id)
         ->build();
 
-    $request->add([
-      'access_token' => $token,
-    ]);
+    $request->add(['access_token' => $token]);
 
     return $request;
   }
