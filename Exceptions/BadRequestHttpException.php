@@ -4,17 +4,17 @@ namespace Modulus\Http\Exceptions;
 
 use Modulus\Upstart\Exceptions\BaseException;
 
-class NotFoundHttpException extends BaseException
+class BadRequestHttpException extends BaseException
 {
   /**
    * {@inheritDoc}
    */
-  protected $title = 'Not found';
+  protected $title = 'Bad Request';
 
   /**
    * {@inheritDoc}
    */
-  protected $message = "Not Found!";
+  protected $message = "Method Not Allowed";
 
   /**
    * Instantiate exception
@@ -22,7 +22,7 @@ class NotFoundHttpException extends BaseException
    * @param int $code Status code
    * @return void
    */
-  public function __construct(int $code = 404)
+  public function __construct(int $code = 405)
   {
     parent::boot();
 

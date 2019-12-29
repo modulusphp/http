@@ -106,7 +106,7 @@ trait HasRequest
     return $this->headers->all();
   }
 
-   /**
+  /**
    * Get request method
    *
    * @return string $this->method
@@ -130,7 +130,7 @@ trait HasRequest
   /**
 	 * Check if current request is xmlhttp or http
 	 *
-	 * @return bool $this->isAjax
+	 * @return bool
 	 */
   public function isAjax() : bool
   {
@@ -141,12 +141,11 @@ trait HasRequest
    * is
    *
    * @param string $url
-   * @return void
+   * @return bool
    */
-  public function is(string $url)
+  public function is(string $url) : bool
   {
-    if ($this->path() == $url || $this->url() == $url) return true;
-    return false;
+    return $this->path() == $url || $this->url() == $url;
   }
 
   /**
@@ -176,10 +175,50 @@ trait HasRequest
    */
   public function isDownForMaintenance() : bool
   {
-    if (file_exists(config('app.dir') . 'storage' . DIRECTORY_SEPARATOR . 'framework' . DIRECTORY_SEPARATOR . 'down')) {
+    return file_exists(app()->getRoot() . 'storage' . DIRECTORY_SEPARATOR . 'framework' . DIRECTORY_SEPARATOR . 'down');
+  }
+
+  /**
+   * Check if response extects json
+   *
+   * @return bool
+   */
+  public function expectsJson() :  bool
+  {
+    if (
+      ($this->headers->has('Accept') && str_contains(strtolower($this->headers->accept), ['json', 'javascript'])) ||
+      (
+        (
+          $this->headers->has('Content-Type') &&
+          !str_contains(strtolower($this->headers->contenttype), ['json', 'javascript'])
+        ) &&
+        !isset($this->headers->all()['Accept'])
+      ) ||
+      $this->isAjax()
+    ) {
       return true;
     }
 
     return false;
+  }
+
+  /**
+   * Check if bearer token is present
+   *
+   * @return bool
+   */
+  public function hasBearer() : bool
+  {
+    return $this->headers->has('Authorization') && starts_with($this->header('Authorization'), 'Bearer ');
+  }
+
+  /**
+   * Get bearer token
+   *
+   * @return string|bool
+   */
+  public function bearerToken()
+  {
+    return $this->hasBearer() ? explode(' ', substr($this->header('Authorization'), 6))[1] : false;
   }
 }

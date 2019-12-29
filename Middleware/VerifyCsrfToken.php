@@ -2,6 +2,7 @@
 
 namespace Modulus\Http\Middleware;
 
+use Modulus\Hibernate\Session;
 use Modulus\Framework\Exceptions\TokenMismatchException;
 
 class VerifyCsrfToken
@@ -91,9 +92,9 @@ class VerifyCsrfToken
    */
   protected function tokenMatches($request) : bool
   {
-    if (!isset($_SESSION['_session_token']) || !$_SESSION['_session_token']) return false;
+    if (!Session::flash()->has('_session_token')) return false;
 
-    return hash_equals($_SESSION['_session_token'], $this->getCsrfToken($request)) ? true : false;
+    return hash_equals(Session::flash()->get('_session_token'), $this->getCsrfToken($request)) ? true : false;
   }
 
   /**
@@ -124,18 +125,18 @@ class VerifyCsrfToken
    */
   protected function hasNotExpired($request) : bool
   {
-    if (!isset($_SESSION['_session_stamp'])) return false;
+    if (!Session::flash()->has('_session_stamp')) return false;
 
     $this->createUrl($request, 'expire');
 
     if (in_array($request->path(), $this->canExpire)) return true;
 
-    $time = $_SESSION['_session_stamp'];
+    $time = Session::flash()->get('_session_stamp');
     $time = base64_decode($time);
 
     $expire = config('auth.expire.session_token');
 
-    if(strtotime($time) < strtotime("-$expire")) {
+    if(strtotime($time) < strtotime("-{$expire} minutes")) {
       $this->hasExpired = true;
       return false;
     }

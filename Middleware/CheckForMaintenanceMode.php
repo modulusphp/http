@@ -28,7 +28,7 @@ class CheckForMaintenanceMode
    */
   public function __construct()
   {
-    $this->down = config('app.dir') . 'storage' . DIRECTORY_SEPARATOR . 'framework' . DIRECTORY_SEPARATOR . 'down';
+    $this->down = app()->getRoot() . 'storage' . DIRECTORY_SEPARATOR . 'framework' . DIRECTORY_SEPARATOR . 'down';
   }
 
   /**
@@ -50,7 +50,7 @@ class CheckForMaintenanceMode
         return $continue;
       }
 
-      throw new ServiceUnavailableHttpException($data['message'] ?? 'Be right back.', $request->isAjax());
+      throw new ServiceUnavailableHttpException($data['message'] ?? 'Be right back.');
     }
 
     return $continue;

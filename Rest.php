@@ -2,7 +2,6 @@
 
 namespace Modulus\Http;
 
-use Modulus\Http\Status;
 use Modulus\Utility\View;
 use Modulus\Support\Extendable;
 
@@ -249,9 +248,11 @@ final class Rest
 
     if (is_array($response)) {
       echo json_encode($response);
-      return;
+      exit;
     }
 
     echo $response;
+
+    exit;
   }
 }

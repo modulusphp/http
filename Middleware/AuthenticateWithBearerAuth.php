@@ -36,11 +36,7 @@ class AuthenticateWithBearerAuth
    */
   protected function hasBearerAuth($request) : bool
   {
-    if ($request->headers->has('Authorization') && starts_with($request->header('Authorization'), 'Bearer ')) {
-      return true;
-    }
-
-    return false;
+    return $request->headers->has('Authorization') && starts_with($request->header('Authorization'), 'Bearer ');
   }
 
   /**
@@ -76,29 +72,23 @@ class AuthenticateWithBearerAuth
    * Validate Token
    *
    * @param mixed $token
-   * @return array $payLoad
+   * @return array
    */
   protected function validateToken($token)
   {
-    $hash   = explode(':', config('app.key'))[0];
-    $secret = explode(':', config('app.key'))[1];
-
-    if ($hash == 'base64') $secret = base64_decode($secret);
-
     $validator = new TokenValidator;
 
     $validator->splitToken($token)
-        ->validateExpiration()
-        ->validateSignature($secret);
+              ->validateExpiration()
+              ->validateSignature(app()->getKey());
 
-    $payLoad = $validator->getPayload();
-
-    return json_decode($payLoad, true);
+    return json_decode($validator->getPayload(), true);
   }
 
   /**
    * Return a rest response if token validation fails
    *
+   * @param \Exception $exception
    * @return void
    */
   protected function fails($exception)
@@ -107,8 +97,10 @@ class AuthenticateWithBearerAuth
   }
 
   /**
-   * response message
+   * Dump response message
    *
+   * @param string $message
+   * @param int $code
    * @return void
    */
   protected function response($message, $code)

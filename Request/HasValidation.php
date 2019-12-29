@@ -45,6 +45,19 @@ trait HasValidation
   }
 
   /**
+   * Set validation rules
+   *
+   * @param array $rules
+   * @return self
+   */
+  public function setRules(array $rules)
+  {
+    $this->rules = $rules;
+
+    return $this;
+  }
+
+  /**
    * Run validation
    *
    * @return mixed

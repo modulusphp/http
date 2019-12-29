@@ -2,7 +2,6 @@
 
 namespace Modulus\Http;
 
-use Modulus\Http\Status;
 use AtlantisPHP\Swish\Route as Swish;
 
 class Route
