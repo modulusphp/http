@@ -4,6 +4,7 @@ namespace Modulus\Http;
 
 use Modulus\Http\Route;
 use Modulus\Http\Status;
+use Modulus\Hibernate\Session;
 use Modulus\Support\Extendable;
 
 final class Redirect
@@ -184,8 +185,8 @@ final class Redirect
     if (!array_key_exists($this->code, Status::CODE)) return false;
 
     if ($this->with !== null || $this->with !== []) {
-      $data = array_merge(isset($_SESSION['application']['with']) ? $_SESSION['application']['with'] : [], $this->with);
-      $_SESSION['application']['with'] = $data;
+      $data = array_merge(Session::flash()->has('application/with') ? Session::flash()->get('application/with') : [], $this->with);
+      Session::flash()->set('application/with', $data);
     }
 
     header('Location: ' . $this->url);
